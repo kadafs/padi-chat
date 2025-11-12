@@ -103,6 +103,30 @@ Rails.application.routes.draw do
 
       resources :stripe_hooks, only: [:create], controller: 'api/v1/subscriptions/stripe_hooks'
       resources :subscription_hooks, only: [:create], controller: 'api/v1/subscriptions/paddle_hooks'
+      
+      # Tidio-like enhanced features
+      scope '/apps/:app_id', module: :tidio do
+        # Visitor Tracking
+        post 'track_visitor' => 'tidio#track_visitor'
+        post 'visitor_activity' => 'tidio#update_visitor_activity'
+        post 'track_event' => 'tidio#track_event'
+        get 'analytics' => 'tidio#visitor_analytics'
+        get 'live_visitors' => 'tidio#live_visitors'
+        get 'visitor_journey/:session_id' => 'tidio#visitor_journey'
+
+        # Proactive Messages
+        resources :proactive_campaigns, controller: 'tidio' do
+          member do
+            post 'test' => 'tidio#test_proactive_campaign'
+            get 'analytics' => 'tidio#campaign_analytics'
+            post 'toggle' => 'tidio#toggle_campaign'
+            post 'duplicate' => 'tidio#duplicate_campaign'
+          end
+          collection do
+            get 'suggestions' => 'tidio#campaign_suggestions'
+          end
+        end
+      end
     end
   end
 

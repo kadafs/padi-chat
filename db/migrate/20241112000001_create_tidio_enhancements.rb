@@ -1,0 +1,225 @@
+# frozen_string_literal: true
+
+class CreateTidioEnhancements < ActiveRecord::Migration[7.0]
+  def change
+    # Enhanced Visitor Tracking (Tidio-like)
+    create_table :visitor_sessions do |t|
+      t.references :app, null: false, foreign_key: true
+      t.references :app_user, null: false, foreign_key: true
+      t.string :session_id, null: false
+      t.string :referrer_url, limit: 2000
+      t.string :landing_page, limit: 2000
+      t.string :current_page, limit: 2000
+      t.jsonb :utm_parameters, default: {}
+      t.string :device_type # desktop, tablet, mobile
+      t.string :browser
+      t.string :os
+      t.string :country_code
+      t.string :city
+      t.inet :ip_address
+      t.jsonb :geolocation, default: {}
+      t.integer :page_views, default: 1
+      t.integer :time_on_site, default: 0 # seconds
+      t.boolean :is_returning, default: false
+      t.timestamp :first_seen_at
+      t.timestamp :last_activity_at
+      t.jsonb :custom_attributes, default: {}
+      t.timestamps
+    end
+
+    # Advanced Chat Features
+    create_table :chat_ratings do |t|
+      t.references :conversation, null: false, foreign_key: true
+      t.references :app_user, null: false, foreign_key: true
+      t.references :agent, null: true, foreign_key: true
+      t.integer :rating, null: false # 1-5 stars
+      t.text :feedback
+      t.string :rating_type # conversation, agent, overall
+      t.timestamps
+    end
+
+    # Enhanced Bot Builder (Visual Flow Builder)
+    create_table :flow_builders do |t|
+      t.references :app, null: false, foreign_key: true
+      t.string :name, null: false
+      t.text :description
+      t.jsonb :flow_data, default: {} # Visual flow configuration
+      t.jsonb :triggers, default: {} # When to trigger this flow
+      t.boolean :active, default: true
+      t.string :flow_type # welcome, qualifying, support, etc.
+      t.integer :position, default: 0
+      t.timestamps
+    end
+
+    # Proactive Chat (Tidio's key feature)
+    create_table :proactive_messages do |t|
+      t.references :app, null: false, foreign_key: true
+      t.string :name, null: false
+      t.jsonb :trigger_conditions, default: {} # time_on_page, pages_visited, etc.
+      t.jsonb :message_content, default: {}
+      t.jsonb :targeting_rules, default: {} # visitor segments, geo, device, etc.
+      t.boolean :active, default: true
+      t.integer :delay_seconds, default: 30
+      t.string :trigger_type # time_based, behavior_based, exit_intent
+      t.integer :priority, default: 0
+      t.datetime :start_date
+      t.datetime :end_date
+      t.jsonb :schedule, default: {} # business hours, days of week
+      t.timestamps
+    end
+
+    # Enhanced Email Marketing (Tidio Email)
+    create_table :email_sequences do |t|
+      t.references :app, null: false, foreign_key: true
+      t.string :name, null: false
+      t.text :description
+      t.jsonb :sequence_data, default: {} # Email flow configuration
+      t.string :trigger_event # signup, purchase, abandon_cart, etc.
+      t.boolean :active, default: true
+      t.timestamps
+    end
+
+    create_table :email_sequence_steps do |t|
+      t.references :email_sequence, null: false, foreign_key: true
+      t.string :name, null: false
+      t.text :subject_line
+      t.text :content
+      t.integer :delay_days, default: 0
+      t.integer :delay_hours, default: 0
+      t.integer :step_order, null: false
+      t.boolean :active, default: true
+      t.timestamps
+    end
+
+    create_table :email_sequence_executions do |t|
+      t.references :email_sequence, null: false, foreign_key: true
+      t.references :app_user, null: false, foreign_key: true
+      t.string :status, default: 'started' # started, in_progress, completed, cancelled, failed
+      t.jsonb :context, default: {}
+      t.timestamp :started_at
+      t.timestamp :completed_at
+      t.text :error_message
+      t.timestamps
+    end
+
+    # Advanced Analytics
+    create_table :conversation_analytics do |t|
+      t.references :conversation, null: false, foreign_key: true
+      t.timestamp :first_response_at
+      t.integer :first_response_time_seconds
+      t.timestamp :resolution_at
+      t.integer :resolution_time_seconds
+      t.integer :agent_messages_count, default: 0
+      t.integer :customer_messages_count, default: 0
+      t.integer :bot_messages_count, default: 0
+      t.boolean :escalated_to_human, default: false
+      t.integer :rating
+      t.text :tags, array: true, default: []
+      t.timestamps
+    end
+
+    # Live Typing Indicators
+    create_table :typing_indicators do |t|
+      t.references :conversation, null: false, foreign_key: true
+      t.references :user, polymorphic: true # Agent or AppUser
+      t.timestamp :started_typing_at
+      t.timestamp :stopped_typing_at
+      t.boolean :is_typing, default: false
+      t.timestamps
+    end
+
+    # File Sharing Enhancements
+    create_table :shared_files do |t|
+      t.references :conversation, null: false, foreign_key: true
+      t.references :sender, polymorphic: true # Agent or AppUser
+      t.string :file_name, null: false
+      t.string :file_type
+      t.integer :file_size
+      t.string :file_url
+      t.string :thumbnail_url
+      t.boolean :is_image, default: false
+      t.boolean :is_document, default: false
+      t.jsonb :metadata, default: {}
+      t.timestamps
+    end
+
+    # Enhanced Contact Management
+    create_table :contact_lists do |t|
+      t.references :app, null: false, foreign_key: true
+      t.string :name, null: false
+      t.text :description
+      t.jsonb :filter_criteria, default: {}
+      t.boolean :is_dynamic, default: false # auto-updating based on criteria
+      t.integer :contacts_count, default: 0
+      t.timestamps
+    end
+
+    create_table :contact_list_memberships do |t|
+      t.references :contact_list, null: false, foreign_key: true
+      t.references :app_user, null: false, foreign_key: true
+      t.timestamp :added_at
+      t.timestamps
+    end
+
+    # Enhanced Widget Customization
+    create_table :widget_themes do |t|
+      t.references :app, null: false, foreign_key: true
+      t.string :name, null: false
+      t.jsonb :theme_config, default: {} # colors, fonts, animations, etc.
+      t.boolean :is_active, default: false
+      t.boolean :is_default, default: false
+      t.timestamps
+    end
+
+    # Mobile App Push Notifications
+    create_table :push_notifications do |t|
+      t.references :app, null: false, foreign_key: true
+      t.references :agent, null: true, foreign_key: true
+      t.string :title, null: false
+      t.text :body
+      t.string :notification_type # new_conversation, mention, etc.
+      t.jsonb :payload, default: {}
+      t.boolean :sent, default: false
+      t.timestamp :sent_at
+      t.string :device_tokens, array: true, default: []
+      t.timestamps
+    end
+
+    # Integration Enhancements
+    create_table :webhook_events do |t|
+      t.references :app, null: false, foreign_key: true
+      t.string :event_type, null: false
+      t.jsonb :payload, default: {}
+      t.string :webhook_url
+      t.integer :attempts, default: 0
+      t.boolean :delivered, default: false
+      t.timestamp :delivered_at
+      t.text :error_message
+      t.timestamps
+    end
+
+    # Add indexes for performance
+    add_index :visitor_sessions, :session_id
+    add_index :visitor_sessions, [:app_id, :session_id]
+    add_index :visitor_sessions, :last_activity_at
+    add_index :proactive_messages, [:app_id, :active]
+    add_index :conversation_analytics, :conversation_id, unique: true
+    add_index :typing_indicators, [:conversation_id, :user_type, :user_id]
+    add_index :contact_list_memberships, [:contact_list_id, :app_user_id], unique: true
+    add_index :webhook_events, [:app_id, :event_type]
+    add_index :webhook_events, :delivered
+
+    # Add columns to existing tables
+    add_column :apps, :tidio_features, :jsonb, default: {}
+    add_column :conversations, :conversation_rating, :integer
+    add_column :conversations, :resolution_time_seconds, :integer
+    add_column :conversations, :customer_satisfaction_score, :integer
+    add_column :app_users, :total_conversations, :integer, default: 0
+    add_column :app_users, :last_contacted_at, :timestamp
+    add_column :app_users, :lead_score, :integer, default: 0
+    add_column :app_users, :lifecycle_stage, :string # visitor, lead, customer, etc.
+    add_column :agents, :online_status, :string, default: 'offline' # online, away, busy, offline
+    add_column :agents, :last_activity_at, :timestamp
+    add_column :agents, :mobile_push_token, :string
+  end
+end

@@ -1509,6 +1509,179 @@ export const STRIPE_CUSTOMER_PORTAL = `
   }
 `;
 
+// Default export moved to end of file to include all mutations
+
+// Tidio-like Visitor Tracking Mutations
+export const TRACK_VISITOR = `
+  mutation TrackVisitor($appKey: String!, $visitorData: JSON!) {
+    trackVisitor(appKey: $appKey, visitorData: $visitorData) {
+      visitorSession {
+        id
+        sessionId
+        isOnline
+      }
+      errors
+    }
+  }
+`;
+
+export const UPDATE_VISITOR_ACTIVITY = `
+  mutation UpdateVisitorActivity($appKey: String!, $sessionId: String!, $activityData: JSON!) {
+    updateVisitorActivity(appKey: $appKey, sessionId: $sessionId, activityData: $activityData) {
+      visitorSession {
+        id
+        currentPage
+        timeOnSite
+        lastActivityAt
+      }
+      errors
+    }
+  }
+`;
+
+export const TRACK_EVENT = `
+  mutation TrackEvent($appKey: String!, $sessionId: String!, $eventName: String!, $eventData: JSON!) {
+    trackEvent(appKey: $appKey, sessionId: $sessionId, eventName: $eventName, eventData: $eventData) {
+      success
+      errors
+    }
+  }
+`;
+
+// Tidio-like Proactive Message Mutations
+export const CREATE_PROACTIVE_CAMPAIGN = `
+  mutation CreateProactiveCampaign($appKey: String!, $campaignData: JSON!) {
+    createProactiveCampaign(appKey: $appKey, campaignData: $campaignData) {
+      proactiveMessage {
+        id
+        name
+        active
+      }
+      errors
+    }
+  }
+`;
+
+export const UPDATE_PROACTIVE_CAMPAIGN = `
+  mutation UpdateProactiveCampaign($appKey: String!, $id: ID!, $campaignData: JSON!) {
+    updateProactiveCampaign(appKey: $appKey, id: $id, campaignData: $campaignData) {
+      proactiveMessage {
+        id
+        name
+        active
+      }
+      errors
+    }
+  }
+`;
+
+export const TEST_PROACTIVE_CAMPAIGN = `
+  mutation TestProactiveCampaign($appKey: String!, $id: ID!) {
+    testProactiveCampaign(appKey: $appKey, id: $id) {
+      success
+      errors
+    }
+  }
+`;
+
+export const TOGGLE_PROACTIVE_CAMPAIGN = `
+  mutation ToggleProactiveCampaign($appKey: String!, $id: ID!) {
+    toggleProactiveCampaign(appKey: $appKey, id: $id) {
+      proactiveMessage {
+        id
+        active
+      }
+      errors
+    }
+  }
+`;
+
+export const DUPLICATE_PROACTIVE_CAMPAIGN = `
+  mutation DuplicateProactiveCampaign($appKey: String!, $id: ID!) {
+    duplicateProactiveCampaign(appKey: $appKey, id: $id) {
+      proactiveMessage {
+        id
+        name
+      }
+      errors
+    }
+  }
+`;
+
+export const INITIATE_PROACTIVE_CHAT = `
+  mutation InitiateProactiveChat($appKey: String!, $sessionId: String!, $campaignId: ID!) {
+    initiateProactiveChat(appKey: $appKey, sessionId: $sessionId, campaignId: $campaignId) {
+      conversation {
+        id
+        key
+      }
+      errors
+    }
+  }
+`;
+
+// Tidio-like Flow Builder Mutations
+export const CREATE_FLOW = `
+  mutation CreateFlow($appKey: String!, $flowData: JSON!) {
+    createFlow(appKey: $appKey, flowData: $flowData) {
+      flow {
+        id
+        name
+        active
+      }
+      errors
+    }
+  }
+`;
+
+export const UPDATE_FLOW = `
+  mutation UpdateFlow($appKey: String!, $id: ID!, $flowData: JSON!) {
+    updateFlow(appKey: $appKey, id: $id, flowData: $flowData) {
+      flow {
+        id
+        name
+        active
+      }
+      errors
+    }
+  }
+`;
+
+export const DELETE_FLOW = `
+  mutation DeleteFlow($appKey: String!, $id: ID!) {
+    deleteFlow(appKey: $appKey, id: $id) {
+      success
+      errors
+    }
+  }
+`;
+
+export const DUPLICATE_FLOW = `
+  mutation DuplicateFlow($appKey: String!, $id: ID!) {
+    duplicateFlow(appKey: $appKey, id: $id) {
+      flow {
+        id
+        name
+      }
+      errors
+    }
+  }
+`;
+
+// Tidio-like Chat Rating Mutation
+export const RATE_CONVERSATION = `
+  mutation RateConversation($appKey: String!, $conversationId: ID!, $rating: Int!, $feedback: String) {
+    rateConversation(appKey: $appKey, conversationId: $conversationId, rating: $rating, feedback: $feedback) {
+      chatRating {
+        id
+        rating
+        feedback
+      }
+      errors
+    }
+  }
+`;
+
 export default {
   PUSH_EVENT,
   UPDATE_APP,
@@ -1590,4 +1763,22 @@ export default {
   APP_USER_PROFILE_UPDATE,
   APP_USER_PROFILE_DELETE,
   STRIPE_SUBSCRIPTION_CREATE_INTENT,
+  // Tidio-like Visitor Tracking Mutations
+  TRACK_VISITOR,
+  UPDATE_VISITOR_ACTIVITY,
+  TRACK_EVENT,
+  // Tidio-like Proactive Message Mutations
+  CREATE_PROACTIVE_CAMPAIGN,
+  UPDATE_PROACTIVE_CAMPAIGN,
+  TEST_PROACTIVE_CAMPAIGN,
+  TOGGLE_PROACTIVE_CAMPAIGN,
+  DUPLICATE_PROACTIVE_CAMPAIGN,
+  INITIATE_PROACTIVE_CHAT,
+  // Tidio-like Flow Builder Mutations
+  CREATE_FLOW,
+  UPDATE_FLOW,
+  DELETE_FLOW,
+  DUPLICATE_FLOW,
+  // Tidio-like Chat Rating Mutation
+  RATE_CONVERSATION,
 };

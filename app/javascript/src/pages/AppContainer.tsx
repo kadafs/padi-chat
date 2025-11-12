@@ -19,6 +19,9 @@ import AgentProfile from './AgentProfile';
 import Billing from './Billing';
 import Api from './Api';
 import Reports from './Reports';
+import TidioInbox from './TidioInbox';
+import FlowBuilder from './FlowBuilder';
+import VisitorTracking from './VisitorTracking';
 
 import { connect } from 'react-redux';
 
@@ -295,6 +298,31 @@ function AppContainer({
                         pushEvent={pushEvent}
                         events={CableApp.current.events}
                       />
+                    </RestrictedArea>
+                  </Route>
+
+                  {/* Tidio-like enhanced features */}
+                  <Route path={`${match.url}/tidio/inbox`}>
+                    <RestrictedArea section="conversations">
+                      <TidioInbox />
+                    </RestrictedArea>
+                  </Route>
+
+                  <Route path={`${match.url}/tidio/visitors`}>
+                    <RestrictedArea section="segments">
+                      <VisitorTracking />
+                    </RestrictedArea>
+                  </Route>
+
+                  <Route path={`${match.url}/tidio/flows`}>
+                    <RestrictedArea section="bots">
+                      <FlowBuilder />
+                    </RestrictedArea>
+                  </Route>
+
+                  <Route path={`${match.url}/tidio/flows/:id`}>
+                    <RestrictedArea section="bots">
+                      <FlowBuilder />
                     </RestrictedArea>
                   </Route>
 

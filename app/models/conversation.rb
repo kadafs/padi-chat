@@ -25,6 +25,12 @@ class Conversation < ApplicationRecord
 
   acts_as_taggable_on :tags
 
+  # Tidio-like enhanced features
+  has_one :conversation_analytics, dependent: :destroy_async
+  has_many :chat_ratings, dependent: :destroy_async
+  has_many :typing_indicators, dependent: :destroy_async
+  has_many :shared_files, dependent: :destroy_async
+
   accepts_nested_attributes_for :conversation_channels
 
   before_create :add_default_assigne

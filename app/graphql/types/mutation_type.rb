@@ -115,5 +115,27 @@ module Types
 
     field :stripeCustomerPortal, mutation: Mutations::StripeSubscriptions::CustomerPortal
     field :stripeCreateIntent, mutation: Mutations::StripeSubscriptions::CreateIntent
+
+    # Tidio-like Visitor Tracking Mutations
+    field :trackVisitor, mutation: Mutations::VisitorTracking::TrackVisitor
+    field :updateVisitorActivity, mutation: Mutations::VisitorTracking::UpdateVisitorActivity
+    field :trackEvent, mutation: Mutations::VisitorTracking::TrackEvent
+
+    # Tidio-like Proactive Message Mutations
+    field :createProactiveCampaign, mutation: Mutations::ProactiveMessages::CreateCampaign
+    field :updateProactiveCampaign, mutation: Mutations::ProactiveMessages::UpdateCampaign
+    field :testProactiveCampaign, mutation: Mutations::ProactiveMessages::TestCampaign
+    field :toggleProactiveCampaign, mutation: Mutations::ProactiveMessages::ToggleCampaign
+    field :duplicateProactiveCampaign, mutation: Mutations::ProactiveMessages::DuplicateCampaign
+    field :initiateProactiveChat, mutation: Mutations::ProactiveMessages::InitiateProactiveChat
+
+    # Tidio-like Flow Builder Mutations
+    field :createFlow, mutation: Mutations::FlowBuilders::CreateFlow
+    field :updateFlow, mutation: Mutations::FlowBuilders::UpdateFlow
+    field :deleteFlow, mutation: Mutations::FlowBuilders::DeleteFlow
+    field :duplicateFlow, mutation: Mutations::FlowBuilders::DuplicateFlow
+
+    # Tidio-like Chat Rating Mutation
+    field :rateConversation, mutation: Mutations::Conversations::RateConversation
   end
 end

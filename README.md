@@ -1,7 +1,7 @@
 
 ![image](https://user-images.githubusercontent.com/11976/81771025-eaefe780-94af-11ea-881b-ad7910536fee.png)
 
-# Chaskiq 
+# Padi Chat 
 ## Free & Source Available Messaging Platform for Marketing, Support & Sales
 ### The front line of your customer service.
 
@@ -81,7 +81,7 @@ Also it can display the visit activity and the conversation performance like rep
 
 ## Help Center
 
-Chaskiq has a powerful article content creator which can serve as a Help Center / Knowledge base system. it can live on a custom domain or in the same webchat for your customer auto assistance.
+Padi Chat has a powerful article content creator which can serve as a Help Center / Knowledge base system. it can live on a custom domain or in the same webchat for your customer auto assistance.
 
 ![image](https://user-images.githubusercontent.com/11976/81776113-33150700-94bc-11ea-84c7-86a694c13885.png)
 
@@ -98,13 +98,13 @@ To get your environment setup, follow the community setup guide for your operati
 
 Before you get started, ensure you have the following minimum versions: [Ruby 2.6+](https://www.ruby-lang.org/en/downloads/), [PostgreSQL 10+](https://www.postgresql.org/download/), [Redis 2.6+](https://redis.io/download).
 
-## Setting up Chaskiq
+## Setting up Padi Chat
 
-If you want to set up a Chaskiq for production use, see our [**Chaskiq Install Guide**](https://dev.chaskiq.io/production-configuration).
+If you want to set up a Padi Chat for production use, see our [**Padi Chat Install Guide**](https://dev.chaskiq.io/production-configuration).
 
 ## Requirements
 
-Chaskiq is built for the *next* 10 years of the Internet, so our requirements are high:
+Padi Chat is built for the *next* 10 years of the Internet, so our requirements are high:
 
 | Browsers              | Tablets      | Phones       |
 | --------------------- | ------------ | ------------ |
@@ -122,11 +122,11 @@ Chaskiq is built for the *next* 10 years of the Internet, so our requirements ar
 
 Plus *lots* of Ruby Gems, a complete list of which is at [/main/Gemfile](https://github.com/chaskiq/chaskiq/blob/main/Gemfile).
 
-## The Chaskiq Team
+## The Padi Chat Team
 
-For a complete list of the many individuals that contributed to the design and implementation of Chaskiq, please refer to [GitHub's list of contributors](https://github.com/chaskiq/chaskiq/contributors).
+For a complete list of the many individuals that contributed to the design and implementation of Padi Chat, please refer to [GitHub's list of contributors](https://github.com/chaskiq/chaskiq/contributors).
 
 ### Commercial license
 
-The commercial license is designed to for you to use Chaskiq in commercial products and applications, without the provisions of the AGPL-3.0-or-later + commons clause. With the commercial license, your code is kept proprietary, to yourself. See the Chaskiq Commercial License at [chaskiq.io](https://chaskiq.io/commercial-license)
+The commercial license is designed to for you to use Padi Chat in commercial products and applications, without the provisions of the AGPL-3.0-or-later + commons clause. With the commercial license, your code is kept proprietary, to yourself. See the Padi Chat Commercial License at [chaskiq.io](https://chaskiq.io/commercial-license)
 

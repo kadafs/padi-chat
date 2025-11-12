@@ -110,6 +110,27 @@ export default function definitions() {
           allowed: allowedAccessTo(app, 'conversations'),
         },
         {
+          id: 'TidioInbox',
+          label: 'Tidio Inbox',
+          icon: <ChatIcon />,
+          url: `/apps/${app.key}/tidio/inbox`,
+          allowed: allowedAccessTo(app, 'conversations'),
+        },
+        {
+          id: 'VisitorTracking',
+          label: 'Visitor Tracking',
+          icon: <PlatformIcon />,
+          url: `/apps/${app.key}/tidio/visitors`,
+          allowed: allowedAccessTo(app, 'segments'),
+        },
+        {
+          id: 'FlowBuilder',
+          label: 'Flow Builder',
+          icon: <BotIcon />,
+          url: `/apps/${app.key}/tidio/flows`,
+          allowed: allowedAccessTo(app, 'bots'),
+        },
+        {
           id: 'Campaigns',
           label: I18n.t('navigator.campaigns'),
           url: `/apps/${app.key}/campaigns`,

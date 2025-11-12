@@ -57,5 +57,19 @@ module Types
                           .per(per)
                           .fast_page
     end
+
+    # Tidio-like enhanced features
+    field :conversation_analytics, Types::ConversationAnalyticsType, null: true
+    field :chat_ratings, [Types::ChatRatingType], null: false
+    field :typing_indicators, [Types::TypingIndicatorType], null: false
+    field :shared_files, [Types::SharedFileType], null: false
+
+    def typing_indicators
+      object.typing_indicators.active
+    end
+
+    def shared_files
+      object.shared_files.recent.limit(50)
+    end
   end
 end

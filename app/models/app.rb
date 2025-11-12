@@ -95,6 +95,15 @@ class App < ApplicationRecord
   has_many :assignment_rules, dependent: :destroy_async
   has_many :outgoing_webhooks, dependent: :destroy_async
   has_many :oauth_applications, class_name: "Doorkeeper::Application", as: :owner, dependent: :destroy_async
+  # Tidio-like enhanced features
+  has_many :visitor_sessions, dependent: :destroy_async
+  has_many :proactive_messages, dependent: :destroy_async
+  has_many :flow_builders, dependent: :destroy_async
+  has_many :email_sequences, dependent: :destroy_async
+  has_many :contact_lists, dependent: :destroy_async
+  has_many :widget_themes, dependent: :destroy_async
+  has_many :push_notifications, dependent: :destroy_async
+  has_many :webhook_events, dependent: :destroy_async
   belongs_to :owner, class_name: "Agent", optional: true # , foreign_key: "owner_id"
 
   has_one_attached :logo

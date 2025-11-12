@@ -76,7 +76,7 @@ en:
     cta: Try to go home
   home:
     welcome: Welcome to
-    welcome_site: Chaskiq
+    welcome_site: Padi Chat
     tagline: Find your current applications here
     create_new: Create New App
     choose_lang: Choose Language
@@ -99,7 +99,7 @@ en:
     status: Live chat status
     status_running: Running
     status_paused: Paused
-    guides: Chaskiq Guides
+    guides: Padi Chat Guides
   navigator:
     dashboard: Dashboard
     platform: Platform
@@ -133,7 +133,7 @@ en:
       billing: Billing
     user_menu:
       create_app: Create New App
-      create_app_description: Create your company’s Chaskiq app
+      create_app_description: Create your company's Padi Chat app
       signout: Sign Out
       title: User Menu
   profile:

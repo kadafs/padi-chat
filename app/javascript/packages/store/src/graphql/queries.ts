@@ -1110,6 +1110,157 @@ export const UPDATE_SUBSCRIPTION_PLAN = `
   }
 `;
 
+// Tidio-like Visitor Tracking Queries
+export const VISITOR_SESSIONS = `
+  query VisitorSessions($appKey: String!, $timeRange: String, $status: String) {
+    visitorSessions(appKey: $appKey, timeRange: $timeRange, status: $status) {
+      id
+      sessionId
+      referrerUrl
+      landingPage
+      currentPage
+      deviceType
+      browser
+      os
+      countryCode
+      city
+      pageViews
+      timeOnSite
+      isReturning
+      isOnline
+      firstSeenAt
+      lastActivityAt
+      locationString
+      durationFormatted
+      leadScore
+    }
+  }
+`;
+
+export const LIVE_VISITORS = `
+  query LiveVisitors($appKey: String!) {
+    liveVisitors(appKey: $appKey) {
+      id
+      sessionId
+      currentPage
+      deviceType
+      browser
+      countryCode
+      city
+      timeOnSite
+      isOnline
+      locationString
+      durationFormatted
+    }
+  }
+`;
+
+export const VISITOR_ANALYTICS = `
+  query VisitorAnalytics($appKey: String!, $timeRange: String!) {
+    visitorAnalytics(appKey: $appKey, timeRange: $timeRange) {
+      totalVisitors
+      uniqueVisitors
+      returningVisitors
+      averageTimeOnSite
+      averagePageViews
+      bounceRate
+      topPages {
+        path
+        views
+        uniqueViews
+      }
+      topCountries {
+        country
+        visitors
+      }
+      deviceBreakdown {
+        device
+        count
+        percentage
+      }
+    }
+  }
+`;
+
+// Tidio-like Proactive Message Queries
+export const PROACTIVE_MESSAGES = `
+  query ProactiveMessages($appKey: String!, $status: String, $triggerType: String, $searchTerm: String) {
+    proactiveMessages(appKey: $appKey, status: $status, triggerType: $triggerType, searchTerm: $searchTerm) {
+      edges {
+        node {
+          id
+          name
+          messageContent
+          triggerType
+          active
+          priority
+          createdAt
+          updatedAt
+        }
+      }
+    }
+  }
+`;
+
+export const PROACTIVE_MESSAGE_ANALYTICS = `
+  query ProactiveMessageAnalytics($appKey: String!, $campaignId: ID!, $timeRange: String!) {
+    proactiveMessageAnalytics(appKey: $appKey, campaignId: $campaignId, timeRange: $timeRange) {
+      totalTriggers
+      totalConversations
+      conversionRate
+      topTriggerPages {
+        page
+        triggers
+      }
+      hourlyPerformance {
+        hour
+        triggers
+        conversations
+      }
+    }
+  }
+`;
+
+// Tidio-like Flow Builder Queries
+export const FLOWS = `
+  query Flows($appKey: String!) {
+    flows(appKey: $appKey) {
+      id
+      name
+      description
+      active
+      triggerType
+      createdAt
+      updatedAt
+    }
+  }
+`;
+
+export const FLOW = `
+  query Flow($appKey: String!, $id: ID!) {
+    flow(appKey: $appKey, id: $id) {
+      id
+      name
+      description
+      active
+      triggerType
+      flowData
+      triggers
+      nodes
+      connections
+      startNode
+      flowStats {
+        totalExecutions
+        successfulCompletions
+        abandonmentRate
+        averageCompletionTime
+      }
+      createdAt
+      updatedAt
+    }
+  }
+`;
+
 export default {
   APPS,
   APP,
@@ -1147,6 +1298,13 @@ export default {
   BOT_TASK,
   BOT_TASK_METRICS,
   DASHBOARD,
+  VISITOR_SESSIONS,
+  LIVE_VISITORS,
+  VISITOR_ANALYTICS,
+  PROACTIVE_MESSAGES,
+  PROACTIVE_MESSAGE_ANALYTICS,
+  FLOWS,
+  FLOW,
   APP_PACKAGES,
   AGENT_APP_PACKAGES,
   APP_PACKAGE,

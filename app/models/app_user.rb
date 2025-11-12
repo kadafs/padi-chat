@@ -59,6 +59,11 @@ class AppUser < ApplicationRecord
   has_many :metrics, dependent: :destroy_async
   has_many :visits, dependent: :destroy_async
   has_many :external_profiles, dependent: :destroy_async
+  # Tidio-like enhanced features
+  has_many :visitor_sessions, dependent: :destroy_async
+  has_many :chat_ratings, dependent: :destroy_async
+  has_many :contact_list_memberships, dependent: :destroy_async
+  has_many :contact_lists, through: :contact_list_memberships
 
   acts_as_taggable_on :tags
 
