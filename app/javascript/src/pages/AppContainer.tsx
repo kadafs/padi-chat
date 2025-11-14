@@ -22,6 +22,8 @@ import Reports from './Reports';
 import TidioInbox from './TidioInbox';
 import FlowBuilder from './FlowBuilder';
 import VisitorTracking from './VisitorTracking';
+import ProactiveMessageCampaign from './ProactiveMessageCampaign';
+import EmailSequenceManager from './EmailSequenceManager';
 
 import { connect } from 'react-redux';
 
@@ -323,6 +325,30 @@ function AppContainer({
                   <Route path={`${match.url}/tidio/flows/:id`}>
                     <RestrictedArea section="bots">
                       <FlowBuilder />
+                    </RestrictedArea>
+                  </Route>
+
+                  <Route path={`${match.url}/tidio/campaigns`}>
+                    <RestrictedArea section="campaigns">
+                      <ProactiveMessageCampaign />
+                    </RestrictedArea>
+                  </Route>
+
+                  <Route path={`${match.url}/tidio/campaigns/:id`}>
+                    <RestrictedArea section="campaigns">
+                      <ProactiveMessageCampaign />
+                    </RestrictedArea>
+                  </Route>
+
+                  <Route path={`${match.url}/tidio/email-sequences`}>
+                    <RestrictedArea section="campaigns">
+                      <EmailSequenceManager />
+                    </RestrictedArea>
+                  </Route>
+
+                  <Route path={`${match.url}/tidio/email-sequences/:id`}>
+                    <RestrictedArea section="campaigns">
+                      <EmailSequenceManager />
                     </RestrictedArea>
                   </Route>
 

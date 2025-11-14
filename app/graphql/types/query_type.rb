@@ -6,6 +6,7 @@ module Types
     include QueryTypeExtensions::VisitorTrackingQueries
     include QueryTypeExtensions::ProactiveMessageQueries
     include QueryTypeExtensions::FlowBuilderQueries
+    include QueryTypeExtensions::EmailSequenceQueries
     # Add root-level fields here.
     # They will be entry points for queries on your schema.
 

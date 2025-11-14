@@ -1682,6 +1682,66 @@ export const RATE_CONVERSATION = `
   }
 `;
 
+// Tidio-like Email Sequence Mutations
+export const CREATE_EMAIL_SEQUENCE = `
+  mutation CreateEmailSequence($appKey: String!, $sequenceData: JSON!) {
+    createEmailSequence(appKey: $appKey, sequenceData: $sequenceData) {
+      emailSequence {
+        id
+        name
+        active
+      }
+      errors
+    }
+  }
+`;
+
+export const UPDATE_EMAIL_SEQUENCE = `
+  mutation UpdateEmailSequence($appKey: String!, $id: ID!, $sequenceData: JSON!) {
+    updateEmailSequence(appKey: $appKey, id: $id, sequenceData: $sequenceData) {
+      emailSequence {
+        id
+        name
+        active
+      }
+      errors
+    }
+  }
+`;
+
+export const DELETE_EMAIL_SEQUENCE = `
+  mutation DeleteEmailSequence($appKey: String!, $id: ID!) {
+    deleteEmailSequence(appKey: $appKey, id: $id) {
+      success
+      errors
+    }
+  }
+`;
+
+export const TOGGLE_EMAIL_SEQUENCE = `
+  mutation ToggleEmailSequence($appKey: String!, $id: ID!) {
+    toggleEmailSequence(appKey: $appKey, id: $id) {
+      emailSequence {
+        id
+        active
+      }
+      errors
+    }
+  }
+`;
+
+export const DUPLICATE_EMAIL_SEQUENCE = `
+  mutation DuplicateEmailSequence($appKey: String!, $id: ID!) {
+    duplicateEmailSequence(appKey: $appKey, id: $id) {
+      emailSequence {
+        id
+        name
+      }
+      errors
+    }
+  }
+`;
+
 export default {
   PUSH_EVENT,
   UPDATE_APP,
@@ -1781,4 +1841,10 @@ export default {
   DUPLICATE_FLOW,
   // Tidio-like Chat Rating Mutation
   RATE_CONVERSATION,
+  // Tidio-like Email Sequence Mutations
+  CREATE_EMAIL_SEQUENCE,
+  UPDATE_EMAIL_SEQUENCE,
+  DELETE_EMAIL_SEQUENCE,
+  TOGGLE_EMAIL_SEQUENCE,
+  DUPLICATE_EMAIL_SEQUENCE,
 };

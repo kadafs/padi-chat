@@ -137,5 +137,12 @@ module Types
 
     # Tidio-like Chat Rating Mutation
     field :rateConversation, mutation: Mutations::Conversations::RateConversation
+
+    # Tidio-like Email Sequence Mutations
+    field :createEmailSequence, mutation: Mutations::EmailSequences::CreateSequence
+    field :updateEmailSequence, mutation: Mutations::EmailSequences::UpdateSequence
+    field :deleteEmailSequence, mutation: Mutations::EmailSequences::DeleteSequence
+    field :toggleEmailSequence, mutation: Mutations::EmailSequences::ToggleSequence
+    field :duplicateEmailSequence, mutation: Mutations::EmailSequences::DuplicateSequence
   end
 end

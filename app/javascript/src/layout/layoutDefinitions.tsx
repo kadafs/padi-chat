@@ -8,6 +8,7 @@ import {
   DashboardIcon,
   HelpCenterIcon,
   PlatformIcon,
+  EmailIcon,
 } from '@chaskiq/components/src/components/icons';
 import icon from '../images/favicon.png';
 import { allowedAccessTo } from '@chaskiq/components/src/components/AccessDenied';
@@ -129,6 +130,20 @@ export default function definitions() {
           icon: <BotIcon />,
           url: `/apps/${app.key}/tidio/flows`,
           allowed: allowedAccessTo(app, 'bots'),
+        },
+        {
+          id: 'ProactiveCampaigns',
+          label: 'Proactive Campaigns',
+          icon: <CampaignsIcon />,
+          url: `/apps/${app.key}/tidio/campaigns`,
+          allowed: allowedAccessTo(app, 'campaigns'),
+        },
+        {
+          id: 'EmailSequences',
+          label: 'Email Sequences',
+          icon: <EmailIcon />,
+          url: `/apps/${app.key}/tidio/email-sequences`,
+          allowed: allowedAccessTo(app, 'campaigns'),
         },
         {
           id: 'Campaigns',

@@ -1236,6 +1236,57 @@ export const FLOWS = `
   }
 `;
 
+// Tidio-like Email Sequence Queries
+export const EMAIL_SEQUENCES = `
+  query EmailSequences($appKey: String!, $status: String, $triggerEvent: String) {
+    emailSequences(appKey: $appKey, status: $status, triggerEvent: $triggerEvent) {
+      id
+      name
+      description
+      triggerEvent
+      active
+      stepsCount
+      activeExecutionsCount
+      createdAt
+      updatedAt
+    }
+  }
+`;
+
+export const EMAIL_SEQUENCE = `
+  query EmailSequence($appKey: String!, $id: ID!) {
+    emailSequence(appKey: $appKey, id: $id) {
+      id
+      name
+      description
+      triggerEvent
+      active
+      sequenceData
+      steps {
+        id
+        name
+        subjectLine
+        content
+        delayDays
+        delayHours
+        stepOrder
+        active
+      }
+      executions {
+        id
+        status
+        context
+        startedAt
+        completedAt
+      }
+      stepsCount
+      activeExecutionsCount
+      createdAt
+      updatedAt
+    }
+  }
+`;
+
 export const FLOW = `
   query Flow($appKey: String!, $id: ID!) {
     flow(appKey: $appKey, id: $id) {
@@ -1305,6 +1356,8 @@ export default {
   PROACTIVE_MESSAGE_ANALYTICS,
   FLOWS,
   FLOW,
+  EMAIL_SEQUENCES,
+  EMAIL_SEQUENCE,
   APP_PACKAGES,
   AGENT_APP_PACKAGES,
   APP_PACKAGE,
