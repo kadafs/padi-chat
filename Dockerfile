@@ -46,15 +46,14 @@ RUN chown -R docker:docker /usr/src/app
 WORKDIR /tmp
 COPY Gemfile Gemfile.lock /tmp/
 # Clear bundler cache and git cache to ensure fresh fetches
-# Remove any cached git gems and force fresh fetch
+# Remove any cached git gems and force fresh fetch for globalize
 RUN rm -rf /usr/local/bundle/cache && \
     rm -rf /root/.bundle/cache && \
     rm -rf /usr/local/bundle/bundler/gems/globalize-* && \
     rm -rf /tmp/.bundle && \
-    bundle config unset deployment && \
-    bundle config set --local force_ruby_platform false && \
-    bundle install -j ${BUNDLE_JOBS} --retry ${BUNDLE_RETRY} || \
-    (bundle update globalize && bundle install -j ${BUNDLE_JOBS} --retry ${BUNDLE_RETRY})
+    sed -i '/^GIT$/,/^$/ { /^  remote: https:\/\/github.com\/jules-w2\/globalize.git/,/^$/d; }' Gemfile.lock && \
+    bundle update globalize && \
+    bundle install -j ${BUNDLE_JOBS} --retry ${BUNDLE_RETRY}
 # Clean up APT when done
 RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && \
     truncate -s 0 /var/log/*log
