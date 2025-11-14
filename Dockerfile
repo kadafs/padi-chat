@@ -45,7 +45,10 @@ RUN chown -R docker:docker /usr/src/app
 # Bundler install gems
 WORKDIR /tmp
 COPY Gemfile Gemfile.lock /tmp/
-RUN bundle install -j ${BUNDLE_JOBS} --retry ${BUNDLE_RETRY}
+# Clear bundler cache and git cache to ensure fresh fetches
+RUN rm -rf /usr/local/bundle/cache && \
+    rm -rf /root/.bundle/cache && \
+    bundle install -j ${BUNDLE_JOBS} --retry ${BUNDLE_RETRY}
 # Clean up APT when done
 RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && \
     truncate -s 0 /var/log/*log

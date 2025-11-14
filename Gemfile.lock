@@ -15,7 +15,6 @@ GIT
 
 GIT
   remote: https://github.com/jules-w2/globalize.git
-  revision: 6013c2dd615759ff55892f950b4cb7e8ea36c641
   branch: main
   specs:
     globalize (6.3.0)
