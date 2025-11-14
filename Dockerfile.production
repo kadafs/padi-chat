@@ -36,7 +36,10 @@ WORKDIR /app
 COPY Gemfile Gemfile.lock package.json yarn.lock ./
 
 # Install dependencies
-RUN bundle install --jobs ${BUNDLE_JOBS} --retry ${BUNDLE_RETRY} && \
+# Clear bundler cache to ensure fresh git fetches
+RUN rm -rf /usr/local/bundle/cache && \
+    rm -rf /root/.bundle/cache && \
+    bundle install --jobs ${BUNDLE_JOBS} --retry ${BUNDLE_RETRY} && \
     yarn install --frozen-lockfile
 
 # Copy application code
