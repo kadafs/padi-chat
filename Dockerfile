@@ -69,6 +69,9 @@ WORKDIR /usr/src/app
 # Copy app source into container
 COPY --chown=docker:docker . /usr/src/app/
 
+# Run bundle install again in the app directory to ensure git sources are available
+RUN bundle install -j ${BUNDLE_JOBS} --retry ${BUNDLE_RETRY}
+
 # Precompile assets - production only
 # Clean up temp files and Yarn cache folder
 RUN NODE_OPTIONS="--max-old-space-size=2048" \
