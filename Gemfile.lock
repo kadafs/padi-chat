@@ -17,7 +17,7 @@ GIT
   remote: https://github.com/jules-w2/globalize.git
   branch: main
   specs:
-    globalize (6.3.0)
+    globalize (7.0.0)
       activemodel (>= 4.2, < 8)
       activerecord (>= 4.2, < 8)
       request_store (~> 1.0)
