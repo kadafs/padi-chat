@@ -94,6 +94,7 @@ function Sidebar({
   drawer,
   history,
   theme,
+  accessToken,
 }) {
   const { current_page, current_section } = navigation;
 
