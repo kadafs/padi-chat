@@ -36,6 +36,7 @@ import I18n from '../shared/FakeI18n';
 import SidebarAgents from '../pages/conversations/SidebarAgents';
 
 import SidebarReportMenu from '../pages/reports/SidebarMenu';
+import NotificationCenter from '../components/NotificationCenter';
 
 import graphql from '@chaskiq/store/src/graphql/client';
 
@@ -497,6 +498,9 @@ function Sidebar({
 
           <div className="flex-shrink-0 flex border-t border-gray-200 dark:border-gray-900 px-3 py-2">
             <div className="flex-shrink-0 group block focus:outline-none">
+              <div className="flex items-center justify-between w-full mb-2">
+                <NotificationCenter />
+              </div>
               <div className="flex items-center">
                 <div>
                   <img

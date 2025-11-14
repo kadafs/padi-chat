@@ -48,6 +48,8 @@ import RestrictedArea, {
 } from '@chaskiq/components/src/components/AccessDenied';
 
 import Notifications from '@chaskiq/components/src/components/notifications';
+import NotificationCenter from '../components/NotificationCenter';
+import RealtimeAnalytics from './RealtimeAnalytics';
 
 import Sidebar from '../layout/sidebar';
 import PackageSlider from '../pages/conversations/packageSlider';
@@ -349,6 +351,12 @@ function AppContainer({
                   <Route path={`${match.url}/tidio/email-sequences/:id`}>
                     <RestrictedArea section="campaigns">
                       <EmailSequenceManager />
+                    </RestrictedArea>
+                  </Route>
+
+                  <Route path={`${match.url}/tidio/analytics`}>
+                    <RestrictedArea section="reports">
+                      <RealtimeAnalytics />
                     </RestrictedArea>
                   </Route>
 

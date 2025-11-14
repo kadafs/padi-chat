@@ -146,6 +146,13 @@ export default function definitions() {
           allowed: allowedAccessTo(app, 'campaigns'),
         },
         {
+          id: 'RealtimeAnalytics',
+          label: 'Real-time Analytics',
+          icon: <ChartsIcons />,
+          url: `/apps/${app.key}/tidio/analytics`,
+          allowed: allowedAccessTo(app, 'reports'),
+        },
+        {
           id: 'Campaigns',
           label: I18n.t('navigator.campaigns'),
           url: `/apps/${app.key}/campaigns`,
