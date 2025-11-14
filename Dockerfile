@@ -62,15 +62,16 @@ RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && \
 # Ensure setuid and setgid permissions are removed
 RUN find / -perm /6000 -type f -exec chmod a-s {} \; || true
 
-# Change user and set workdir
-USER docker
+# Switch to app directory and copy source
 WORKDIR /usr/src/app
-
-# Copy app source into container
 COPY --chown=docker:docker . /usr/src/app/
 
 # Run bundle install again in the app directory to ensure git sources are available
+# This must run as root to write to /usr/local/bundle
 RUN bundle install -j ${BUNDLE_JOBS} --retry ${BUNDLE_RETRY}
+
+# Change to docker user for remaining operations
+USER docker
 
 # Precompile assets - production only
 # Clean up temp files and Yarn cache folder
