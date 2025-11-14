@@ -80,7 +80,17 @@ module Chaskiq
       config.middleware.insert_before Rack::Sendfile, Middleware::MaintenanceMode
     end
 
-    URLcrypt.key = [Chaskiq::Config.get('SECRET_KEY_BASE')].pack('H*')
+    # Configure URLcrypt key from SECRET_KEY_BASE
+    # Use a digest to ensure we get a safe 32-byte key without null bytes
+    # This avoids issues with environment variables that cannot contain null bytes
+    secret_key = Chaskiq::Config.get('SECRET_KEY_BASE')
+    if secret_key.present?
+      # Generate a 32-byte key using SHA256 digest of SECRET_KEY_BASE
+      # This ensures no null bytes and consistent key generation
+      require 'digest'
+      digest = Digest::SHA256.digest(secret_key.to_s)
+      URLcrypt.key = digest.byteslice(0, 32)
+    end
 
     locales = %w[af sq ar eu bg be ca hr cs da nl en eo et fo fi fr gl de el iw hu is ga it ja ko lv lt mk mt no pl pt ro ru gd sr sr sk sl es sv tr uk zh-CN]
     config.available_locales = locales
