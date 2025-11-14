@@ -34,17 +34,26 @@ jobs:
       RAILS_MASTER_KEY: ${{ secrets.RAILS_MASTER_KEY }}
     steps:
       - uses: actions/checkout@v1
-      - uses: ruby/setup-ruby@v1
+      
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
         with:
           # ruby-version: 2.7.2 # no need with ruby-version file
-          bundler-cache: true
-        continue-on-error: true
+          # Don't use bundler-cache to avoid deployment mode and bundle clean issues with git sources
+          bundler-cache: false
 
-      - name: Fix git sources and reinstall
+      - name: Cache gems
+        uses: actions/cache@v3
+        with:
+          path: vendor/bundle
+          key: ${{ runner.os }}-gems-${{ hashFiles('**/Gemfile.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-gems-
+
+      - name: Install dependencies
         run: |
-          # Disable deployment mode to avoid bundle clean issues with git sources
-          bundle config --local deployment false || true
-          # Ensure git sources are checked out
+          bundle config path vendor/bundle
+          bundle config deployment false
           bundle install --jobs 4 --retry 3
 
       - uses: actions/setup-node@v3
