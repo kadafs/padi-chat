@@ -14,13 +14,23 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - uses: actions/checkout@v2
+
+      - name: Check if Docker credentials exist
+        id: docker_creds
+        run: |
+          if [ -n "${{ secrets.DOCKER_USERNAME }}" ] && [ -n "${{ secrets.DOCKER_PASSWORD }}" ]; then
+            echo "has_creds=true" >> $GITHUB_OUTPUT
+          else
+            echo "has_creds=false" >> $GITHUB_OUTPUT
+          fi
+
       - name: Login into Registry
+        if: steps.docker_creds.outputs.has_creds == 'true'
         uses: azure/docker-login@v1
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
-
-      - uses: actions/checkout@v2
 
       - name: Get Short SHA
         id: vars
@@ -39,7 +49,7 @@ jobs:
                .
 
       - name: Tag and Push Docker image
-        if: github.event_name == 'push'
+        if: github.event_name == 'push' && steps.docker_creds.outputs.has_creds == 'true'
         run: |
           docker tag $GITHUB_REPOSITORY $GITHUB_REPOSITORY:$SHORT_SHA
           docker push $GITHUB_REPOSITORY:$SHORT_SHA
@@ -48,14 +58,14 @@ jobs:
           SHORT_SHA: ${{ steps.vars.outputs.short_sha }}
 
       - name: Tag LATEST and Push Docker image
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.docker_creds.outputs.has_creds == 'true'
         run: |
           docker tag $GITHUB_REPOSITORY $GITHUB_REPOSITORY:latest
           docker push $GITHUB_REPOSITORY:latest
           echo "LATEST deployed!"
 
       - name: Tag RELEASE and Push Docker image
-        if: github.event_name	== 'release'
+        if: github.event_name == 'release' && steps.docker_creds.outputs.has_creds == 'true'
         run: |
           docker tag $GITHUB_REPOSITORY $GITHUB_REPOSITORY:${{ github.ref_name }}
           docker push $GITHUB_REPOSITORY:${{ github.ref_name }}
