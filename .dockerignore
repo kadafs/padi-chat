@@ -19,16 +19,14 @@
 /node_modules
 /yarn-error.log
 
-/public/assets
+# Keep precompiled assets, but ignore test packs
+/public/packs-test
 .byebug_history
 
 # Ignore master key for decrypting credentials and more.
 /config/master.key
-/public/packs-test
-/node_modules
 yarn-debug.log*
 .yarn-integrity
-
 
 # Ignore Byebug command history file.
 .byebug_history
@@ -36,11 +34,47 @@ yarn-debug.log*
 # Ignore .git as it's not needed with the docker built.
 .git
 .cache
+.gitignore
+.gitattributes
 
+# Ignore environment files
 .env
 .env.*
 .envrc
 
+# Ignore credentials
 config/credentials/*.key
 config/credentials/*.yml.enc
+
+# Ignore test and spec files
+/spec
+/test
+*.md
+README*
+CHANGELOG*
+LICENSE*
+
+# Ignore documentation
+/doc
+/docs
+
+# Ignore CI/CD files (not needed in image)
+.github
+.gitlab-ci.yml
+.travis.yml
+
+# Ignore editor files
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# Ignore coverage reports
+/coverage
+
+# Ignore development dependencies
+/node_modules
+/yarn.lock
+package-lock.json
 

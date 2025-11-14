@@ -82,6 +82,39 @@ RUN NODE_OPTIONS="--max-old-space-size=2048" \
     AWS_S3_BUCKET=test \
     AWS_S3_REGION=us-east-1 \
     SECRET_KEY_BASE=`bin/rails secret` \
-    bundle exec rails assets:precompile --trace \
-    && rm -rf /usr/src/app/node_modules /usr/src/app/tmp/cache/* /tmp/* \
-    && yarn cache clean
+    bundle exec rails assets:precompile --trace
+
+# Aggressive cleanup to reduce image size
+USER root
+RUN rm -rf /usr/src/app/node_modules \
+    && rm -rf /usr/src/app/tmp/cache/* \
+    && rm -rf /tmp/* \
+    && rm -rf /var/tmp/* \
+    && yarn cache clean || true \
+    && npm cache clean --force || true \
+    && rm -rf /root/.npm \
+    && rm -rf /root/.yarn \
+    && rm -rf /root/.cache \
+    && rm -rf /usr/local/bundle/cache \
+    && rm -rf /usr/local/bundle/bundler/gems/*/.git \
+    && find /usr/local/bundle -name "*.md" -delete \
+    && find /usr/local/bundle -name "*.txt" -delete \
+    && find /usr/local/bundle -name "*.rdoc" -delete \
+    && find /usr/local/bundle -name "*.markdown" -delete \
+    && find /usr/local/bundle -name "CHANGELOG*" -delete \
+    && find /usr/local/bundle -name "LICENSE*" -delete \
+    && find /usr/local/bundle -name "*.gemspec" -delete \
+    && find /usr/local/bundle -name "test" -type d -exec rm -rf {} + || true \
+    && find /usr/local/bundle -name "spec" -type d -exec rm -rf {} + || true \
+    && find /usr/local/bundle -name "*.gem" -delete \
+    && apt-get purge -y build-essential || true \
+    && apt-get autoremove -y \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/* \
+    && rm -rf /var/cache/apt/archives/* \
+    && rm -rf /usr/share/doc \
+    && rm -rf /usr/share/man \
+    && rm -rf /usr/share/locale \
+    && truncate -s 0 /var/log/*.log
+
+USER docker
