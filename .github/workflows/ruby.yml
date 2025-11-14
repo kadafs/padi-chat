@@ -38,6 +38,14 @@ jobs:
         with:
           # ruby-version: 2.7.2 # no need with ruby-version file
           bundler-cache: true
+        continue-on-error: true
+
+      - name: Fix git sources and reinstall
+        run: |
+          # Disable deployment mode to avoid bundle clean issues with git sources
+          bundle config --local deployment false || true
+          # Ensure git sources are checked out
+          bundle install --jobs 4 --retry 3
 
       - uses: actions/setup-node@v3
         with:
@@ -47,8 +55,6 @@ jobs:
       - name: Build and precompile
         run: |
           sudo apt-get -yqq install libpq-dev curl libgconf-2-4
-          gem install bundler
-          bundle install --jobs 4 --retry 3
           bundle exec rails db:prepare
           bundle exec rake assets:precompile
       - name: Build and run tests
