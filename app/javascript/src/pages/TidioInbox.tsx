@@ -20,6 +20,9 @@ import {
 import { StarIcon as StarIconSolid } from '@heroicons/react/24/solid';
 import styled from '@emotion/styled';
 import tw from 'twin.macro';
+import graphql from '@chaskiq/store/src/graphql/client';
+import { CONVERSATIONS, CONVERSATION } from '@chaskiq/store/src/graphql/queries';
+import { INSERT_COMMMENT } from '@chaskiq/store/src/graphql/mutations';
 
 // Tidio-inspired styled components
 const InboxContainer = styled.div`
@@ -138,16 +141,102 @@ interface TidioInboxProps {
   currentUser: any;
 }
 
-const TidioInbox: React.FC<TidioInboxProps> = ({ app, conversations, currentUser }) => {
+const TidioInbox: React.FC<TidioInboxProps> = ({ app, conversations: reduxConversations, currentUser }) => {
+  const [conversations, setConversations] = useState<any[]>([]);
   const [activeConversation, setActiveConversation] = useState<any>(null);
+  const [conversationMessages, setConversationMessages] = useState<any[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeFilter, setActiveFilter] = useState('all');
   const [messageText, setMessageText] = useState('');
   const [showUserInfo, setShowUserInfo] = useState(false);
-  const [visitorSessions, setVisitorSessions] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingMessages, setIsLoadingMessages] = useState(false);
+  const [isSending, setIsSending] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // Mock data for demonstration
+  // Fetch conversations
+  const fetchConversations = () => {
+    if (!app?.key) return;
+    
+    setIsLoading(true);
+    const filter = activeFilter === 'all' ? null : activeFilter === 'open' ? 'opened' : activeFilter === 'resolved' ? 'closed' : null;
+    
+    graphql(
+      CONVERSATIONS,
+      {
+        appKey: app.key,
+        page: 1,
+        filter: filter,
+        term: searchQuery || null
+      },
+      {
+        success: (data) => {
+          const convs = data.app.conversations?.collection || [];
+          setConversations(convs);
+          setIsLoading(false);
+        },
+        error: (err) => {
+          console.error('Error fetching conversations:', err);
+          setIsLoading(false);
+        }
+      }
+    );
+  };
+
+  // Fetch messages for a conversation
+  const fetchConversationMessages = (conversationId: string) => {
+    if (!app?.key || !conversationId) return;
+    
+    setIsLoadingMessages(true);
+    graphql(
+      CONVERSATION,
+      {
+        appKey: app.key,
+        id: conversationId,
+        page: 1
+      },
+      {
+        success: (data) => {
+          const conv = data.app.conversation;
+          if (conv) {
+            setActiveConversation(conv);
+            // Messages are typically in conversation.messages or similar
+            // Adjust based on actual GraphQL response structure
+            const messages = conv.messages?.collection || [];
+            setConversationMessages(messages);
+          }
+          setIsLoadingMessages(false);
+        },
+        error: (err) => {
+          console.error('Error fetching conversation messages:', err);
+          setIsLoadingMessages(false);
+        }
+      }
+    );
+  };
+
+  // Initial load
+  useEffect(() => {
+    if (app?.key) {
+      fetchConversations();
+    }
+  }, [app?.key]);
+
+  // Refetch when filter or search changes
+  useEffect(() => {
+    if (app?.key) {
+      fetchConversations();
+    }
+  }, [activeFilter, searchQuery]);
+
+  // Load messages when conversation is selected
+  useEffect(() => {
+    if (activeConversation?.id) {
+      fetchConversationMessages(activeConversation.id);
+    }
+  }, [activeConversation?.id]);
+
+  // Mock data for demonstration (fallback)
   const [mockConversations] = useState([
     {
       id: 1,
@@ -235,11 +324,38 @@ const TidioInbox: React.FC<TidioInboxProps> = ({ app, conversations, currentUser
   };
 
   const handleSendMessage = () => {
-    if (!messageText.trim() || !activeConversation) return;
+    if (!messageText.trim() || !activeConversation || !app?.key || isSending) return;
     
-    // TODO: Implement actual message sending
-    console.log('Sending message:', messageText);
+    setIsSending(true);
+    graphql(
+      INSERT_COMMMENT,
+      {
+        appKey: app.key,
+        id: activeConversation.id,
+        message: {
+          htmlContent: messageText,
+          textContent: messageText,
+          serializedContent: messageText
+        }
+      },
+      {
+        success: (data) => {
+          const newMessage = data.insertComment?.message;
+          if (newMessage) {
+            setConversationMessages([...conversationMessages, newMessage]);
     setMessageText('');
+            scrollToBottom();
+          }
+          setIsSending(false);
+          // Refresh conversation list to update last message
+          fetchConversations();
+        },
+        error: (err) => {
+          console.error('Error sending message:', err);
+          setIsSending(false);
+        }
+      }
+    );
   };
 
   const formatRelativeTime = (date: Date) => {
@@ -273,16 +389,50 @@ const TidioInbox: React.FC<TidioInboxProps> = ({ app, conversations, currentUser
     }
   };
 
-  const filteredConversations = mockConversations.filter(conv => {
+  // Transform conversations to match UI expectations
+  const transformedConversations = conversations.map((conv: any) => {
+    const participant = conv.mainParticipant || {};
+    const lastMsg = conv.lastMessage || {};
+    const unreadCount = lastMsg.readAt ? 0 : 1;
+    
+    return {
+      id: conv.id,
+      key: conv.key,
+      customer: {
+        name: participant.displayName || participant.email || 'Anonymous',
+        email: participant.email,
+        avatar: participant.avatarUrl,
+        isOnline: participant.online || false,
+        location: `${participant.city || ''}, ${participant.country || ''}`.trim() || 'Unknown',
+        device: participant.os || 'unknown',
+        timeOnSite: '0m',
+        pageViews: 0,
+        visitCount: 0
+      },
+      lastMessage: {
+        text: lastMsg.message?.textContent || lastMsg.message?.htmlContent || '',
+        timestamp: lastMsg.createdAt ? new Date(lastMsg.createdAt) : new Date(),
+        isFromCustomer: lastMsg.source === 'app_user'
+      },
+      status: conv.state || 'open',
+      priority: conv.priority || 'normal',
+      unreadCount: unreadCount,
+      tags: conv.tagList || [],
+      assignedAgent: conv.assignee,
+      rating: null
+    };
+  });
+
+  const filteredConversations = transformedConversations.filter((conv: any) => {
     const matchesSearch = searchQuery === '' || 
       conv.customer.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      conv.customer.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      conv.customer.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       conv.lastMessage.text.toLowerCase().includes(searchQuery.toLowerCase());
     
     const matchesFilter = activeFilter === 'all' ||
       (activeFilter === 'unread' && conv.unreadCount > 0) ||
-      (activeFilter === 'open' && conv.status === 'open') ||
-      (activeFilter === 'resolved' && conv.status === 'resolved');
+      (activeFilter === 'open' && conv.status === 'opened') ||
+      (activeFilter === 'resolved' && conv.status === 'closed');
     
     return matchesSearch && matchesFilter;
   });
@@ -333,12 +483,20 @@ const TidioInbox: React.FC<TidioInboxProps> = ({ app, conversations, currentUser
         </SidebarHeader>
         
         <ConversationList>
-          {filteredConversations.map(conversation => (
+          {isLoading && conversations.length === 0 ? (
+            <div className="p-6 text-center text-gray-500">Loading conversations...</div>
+          ) : filteredConversations.length === 0 ? (
+            <div className="p-6 text-center text-gray-500">No conversations found</div>
+          ) : (
+            filteredConversations.map((conversation: any) => (
             <ConversationItem
               key={conversation.id}
               active={activeConversation?.id === conversation.id}
               unread={conversation.unreadCount > 0}
-              onClick={() => setActiveConversation(conversation)}
+              onClick={() => {
+                const fullConv = conversations.find((c: any) => c.id === conversation.id || c.key === conversation.key);
+                setActiveConversation(fullConv || conversation);
+              }}
             >
               <div className="flex items-start space-x-3">
                 <div className="relative">
@@ -391,7 +549,8 @@ const TidioInbox: React.FC<TidioInboxProps> = ({ app, conversations, currentUser
                 </div>
               </div>
             </ConversationItem>
-          ))}
+            ))
+          )}
         </ConversationList>
       </Sidebar>
 
@@ -441,12 +600,22 @@ const TidioInbox: React.FC<TidioInboxProps> = ({ app, conversations, currentUser
             </ConversationHeader>
             
             <ConversationContent>
-              {mockMessages[activeConversation.id]?.map(message => (
-                <Message key={message.id} isAgent={message.isFromAgent}>
+              {isLoadingMessages ? (
+                <div className="text-center text-gray-500 py-8">Loading messages...</div>
+              ) : conversationMessages.length === 0 ? (
+                <div className="text-center text-gray-500 py-8">No messages yet</div>
+              ) : (
+                conversationMessages.map((message: any) => {
+                  const isFromAgent = message.source !== 'app_user';
+                  const timestamp = message.createdAt ? new Date(message.createdAt) : new Date();
+                  const text = message.message?.textContent || message.message?.htmlContent || '';
+                  
+                  return (
+                    <Message key={message.key || message.id} isAgent={isFromAgent}>
                   <Avatar>
-                    {message.isFromAgent ? (
+                        {isFromAgent ? (
                       <span className="text-xs font-medium text-white bg-blue-600 w-full h-full flex items-center justify-center rounded-full">
-                        {currentUser.name?.[0] || 'A'}
+                            {currentUser?.name?.[0] || currentUser?.email?.[0] || 'A'}
                       </span>
                     ) : (
                       <UserIcon className="h-5 w-5 text-gray-500" />
@@ -454,15 +623,17 @@ const TidioInbox: React.FC<TidioInboxProps> = ({ app, conversations, currentUser
                   </Avatar>
                   
                   <div>
-                    <MessageBubble isAgent={message.isFromAgent}>
-                      <p className="text-sm">{message.text}</p>
+                        <MessageBubble isAgent={isFromAgent}>
+                          <p className="text-sm" dangerouslySetInnerHTML={{ __html: text }} />
                     </MessageBubble>
                     <p className="text-xs text-gray-500 mt-1">
-                      {formatRelativeTime(message.timestamp)}
+                          {formatRelativeTime(timestamp)}
                     </p>
                   </div>
                 </Message>
-              ))}
+                  );
+                })
+              )}
               <div ref={messagesEndRef} />
             </ConversationContent>
             
@@ -493,9 +664,9 @@ const TidioInbox: React.FC<TidioInboxProps> = ({ app, conversations, currentUser
                   </ActionButton>
                 </div>
                 
-                <SendButton onClick={handleSendMessage}>
+                <SendButton onClick={handleSendMessage} disabled={isSending || !messageText.trim()}>
                   <PaperAirplaneIcon className="h-5 w-5" />
-                  <span>Send</span>
+                  <span>{isSending ? 'Sending...' : 'Send'}</span>
                 </SendButton>
               </MessageActions>
             </MessageInput>

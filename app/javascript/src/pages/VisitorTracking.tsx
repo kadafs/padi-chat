@@ -16,9 +16,11 @@ import {
   UserGroupIcon,
   ArrowPathIcon
 } from '@heroicons/react/24/outline';
-import { Pie, Line, Bar } from '@nivo/pie';
+import { ResponsivePie } from '@nivo/pie';
 import { ResponsiveLine } from '@nivo/line';
 import { ResponsiveBar } from '@nivo/bar';
+import graphql from '@chaskiq/store/src/graphql/client';
+import { VISITOR_SESSIONS, VISITOR_ANALYTICS, LIVE_VISITORS } from '@chaskiq/store/src/graphql/queries';
 
 // Styled components
 const TrackingContainer = styled.div`
@@ -88,13 +90,80 @@ interface VisitorTrackingProps {
 
 const VisitorTracking: React.FC<VisitorTrackingProps> = ({ app, currentUser }) => {
   const [visitors, setVisitors] = useState([]);
+  const [analytics, setAnalytics] = useState<any>(null);
   const [timeFilter, setTimeFilter] = useState('24h');
   const [locationFilter, setLocationFilter] = useState('all');
   const [deviceFilter, setDeviceFilter] = useState('all');
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [selectedVisitor, setSelectedVisitor] = useState<any>(null);
 
-  // Mock visitor data - would come from real API
+  // Fetch visitor sessions
+  const fetchVisitorSessions = () => {
+    if (!app?.key) return;
+    
+    setIsLoading(true);
+    graphql(
+      VISITOR_SESSIONS,
+      {
+        appKey: app.key,
+        timeRange: timeFilter,
+        status: 'online'
+      },
+      {
+        success: (data) => {
+          const sessions = data.visitorSessions || [];
+          setVisitors(sessions);
+          setIsLoading(false);
+          setIsRefreshing(false);
+        },
+        error: (err) => {
+          console.error('Error fetching visitor sessions:', err);
+          setIsLoading(false);
+          setIsRefreshing(false);
+        }
+      }
+    );
+  };
+
+  // Fetch analytics
+  const fetchAnalytics = () => {
+    if (!app?.key) return;
+    
+    graphql(
+      VISITOR_ANALYTICS,
+      {
+        appKey: app.key,
+        timeRange: timeFilter
+      },
+      {
+        success: (data) => {
+          setAnalytics(data.visitorAnalytics);
+        },
+        error: (err) => {
+          console.error('Error fetching analytics:', err);
+        }
+      }
+    );
+  };
+
+  // Initial load
+  useEffect(() => {
+    if (app?.key) {
+      fetchVisitorSessions();
+      fetchAnalytics();
+    }
+  }, [app?.key]);
+
+  // Refetch when filters change
+  useEffect(() => {
+    if (app?.key) {
+      fetchVisitorSessions();
+      fetchAnalytics();
+    }
+  }, [timeFilter]);
+
+  // Mock visitor data - fallback if API fails
   const [mockVisitors] = useState([
     {
       id: 1,
@@ -178,40 +247,56 @@ const VisitorTracking: React.FC<VisitorTrackingProps> = ({ app, currentUser }) =
     }
   ]);
 
-  // Calculate stats
+  // Calculate stats from real data or fallback to mock
   const stats = useMemo(() => {
-    const onlineVisitors = mockVisitors.filter(v => v.isOnline).length;
-    const totalVisitors = mockVisitors.length;
-    const avgTimeOnSite = mockVisitors.reduce((sum, v) => sum + v.timeOnSite, 0) / totalVisitors;
-    const totalPageViews = mockVisitors.reduce((sum, v) => sum + v.pageViews, 0);
+    const dataSource = visitors.length > 0 ? visitors : mockVisitors;
+    const onlineVisitors = dataSource.filter((v: any) => v.isOnline).length;
+    const totalVisitors = analytics?.totalVisitors || dataSource.length;
+    const avgTimeOnSite = analytics?.averageTimeOnSite || 
+      (dataSource.reduce((sum: number, v: any) => sum + (v.timeOnSite || 0), 0) / dataSource.length);
+    const totalPageViews = analytics?.averagePageViews * totalVisitors || 
+      dataSource.reduce((sum: number, v: any) => sum + (v.pageViews || 0), 0);
 
     return {
       onlineVisitors,
       totalVisitors,
       avgTimeOnSite: Math.round(avgTimeOnSite),
-      totalPageViews
+      totalPageViews: Math.round(totalPageViews)
     };
-  }, [mockVisitors]);
+  }, [visitors, analytics, mockVisitors]);
 
   // Filter visitors
   const filteredVisitors = useMemo(() => {
-    return mockVisitors.filter(visitor => {
-      if (locationFilter !== 'all' && visitor.country !== locationFilter) {
+    const dataSource = visitors.length > 0 ? visitors : mockVisitors;
+    return dataSource.filter((visitor: any) => {
+      if (locationFilter !== 'all' && visitor.countryCode !== locationFilter) {
         return false;
       }
-      if (deviceFilter !== 'all' && visitor.device !== deviceFilter) {
+      if (deviceFilter !== 'all' && visitor.deviceType !== deviceFilter) {
         return false;
       }
       return true;
     });
-  }, [mockVisitors, locationFilter, deviceFilter]);
+  }, [visitors, mockVisitors, locationFilter, deviceFilter]);
 
   // Device distribution data for chart
   const deviceData = useMemo(() => {
-    const deviceCounts = mockVisitors.reduce((acc, visitor) => {
-      acc[visitor.device] = (acc[visitor.device] || 0) + 1;
+    const dataSource = visitors.length > 0 ? visitors : mockVisitors;
+    const deviceCounts = dataSource.reduce((acc: Record<string, number>, visitor: any) => {
+      const device = visitor.deviceType || visitor.device;
+      acc[device] = (acc[device] || 0) + 1;
       return acc;
     }, {} as Record<string, number>);
+
+    // Use analytics data if available
+    if (analytics?.deviceBreakdown) {
+      return analytics.deviceBreakdown.map((item: any) => ({
+        id: item.device,
+        label: item.device,
+        value: item.count,
+        color: item.device === 'desktop' ? '#3b82f6' : item.device === 'mobile' ? '#10b981' : '#f59e0b'
+      }));
+    }
 
     return Object.entries(deviceCounts).map(([device, count]) => ({
       id: device,
@@ -219,12 +304,22 @@ const VisitorTracking: React.FC<VisitorTrackingProps> = ({ app, currentUser }) =
       value: count,
       color: device === 'desktop' ? '#3b82f6' : device === 'mobile' ? '#10b981' : '#f59e0b'
     }));
-  }, [mockVisitors]);
+  }, [visitors, analytics, mockVisitors]);
 
   // Location data for chart
   const locationData = useMemo(() => {
-    const locationCounts = mockVisitors.reduce((acc, visitor) => {
-      acc[visitor.country] = (acc[visitor.country] || 0) + 1;
+    // Use analytics data if available
+    if (analytics?.topCountries) {
+      return analytics.topCountries.map((item: any) => ({
+        country: item.country,
+        visitors: item.visitors
+      }));
+    }
+
+    const dataSource = visitors.length > 0 ? visitors : mockVisitors;
+    const locationCounts = dataSource.reduce((acc: Record<string, number>, visitor: any) => {
+      const country = visitor.countryCode || visitor.country;
+      acc[country] = (acc[country] || 0) + 1;
       return acc;
     }, {} as Record<string, number>);
 
@@ -232,27 +327,28 @@ const VisitorTracking: React.FC<VisitorTrackingProps> = ({ app, currentUser }) =
       country,
       visitors: count
     }));
-  }, [mockVisitors]);
+  }, [visitors, analytics, mockVisitors]);
 
   // Time on site data
   const timeData = useMemo(() => {
+    const dataSource = visitors.length > 0 ? visitors : mockVisitors;
     return [{
       id: 'time_on_site',
-      data: mockVisitors.map((visitor, index) => ({
+      data: dataSource.map((visitor: any, index: number) => ({
         x: index + 1,
-        y: Math.round(visitor.timeOnSite / 60) // convert to minutes
+        y: Math.round((visitor.timeOnSite || 0) / 60) // convert to minutes
       }))
     }];
-  }, [mockVisitors]);
+  }, [visitors, mockVisitors]);
 
-  const handleRefresh = async () => {
+  const handleRefresh = () => {
     setIsRefreshing(true);
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    setIsRefreshing(false);
+    fetchVisitorSessions();
+    fetchAnalytics();
   };
 
   const formatDuration = (seconds: number) => {
+    if (!seconds) return '0s';
     if (seconds < 60) return `${seconds}s`;
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = seconds % 60;
@@ -429,7 +525,16 @@ const VisitorTracking: React.FC<VisitorTrackingProps> = ({ app, currentUser }) =
           </div>
 
           <div className="max-h-96 overflow-y-auto">
-            {filteredVisitors.map(visitor => (
+            {isLoading && visitors.length === 0 ? (
+              <div className="p-6 text-center text-gray-500">
+                Loading visitors...
+              </div>
+            ) : filteredVisitors.length === 0 ? (
+              <div className="p-6 text-center text-gray-500">
+                No visitors found
+              </div>
+            ) : (
+              filteredVisitors.map((visitor: any) => (
               <VisitorItem
                 key={visitor.id}
                 isOnline={visitor.isOnline}
@@ -451,7 +556,7 @@ const VisitorTracking: React.FC<VisitorTrackingProps> = ({ app, currentUser }) =
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center space-x-2">
                         <p className="text-sm font-medium text-gray-900 truncate">
-                          {visitor.name || 'Anonymous Visitor'}
+                          {visitor.appUser?.displayName || visitor.appUser?.email || 'Anonymous Visitor'}
                         </p>
                         {visitor.isReturning && (
                           <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
@@ -463,27 +568,27 @@ const VisitorTracking: React.FC<VisitorTrackingProps> = ({ app, currentUser }) =
                       <div className="flex items-center space-x-4 mt-1 text-xs text-gray-500">
                         <div className="flex items-center space-x-1">
                           <MapPinIcon className="h-3 w-3" />
-                          <span>{visitor.location}</span>
+                          <span>{visitor.locationString || visitor.location || 'Unknown'}</span>
                         </div>
                         
                         <div className="flex items-center space-x-1">
-                          {getDeviceIcon(visitor.device)}
-                          <span>{visitor.device}</span>
+                          {getDeviceIcon(visitor.deviceType || visitor.device)}
+                          <span>{visitor.deviceType || visitor.device}</span>
                         </div>
 
                         <div className="flex items-center space-x-1">
                           <ClockIcon className="h-3 w-3" />
-                          <span>{formatDuration(visitor.timeOnSite)}</span>
+                          <span>{visitor.durationFormatted || formatDuration(visitor.timeOnSite || 0)}</span>
                         </div>
 
                         <div className="flex items-center space-x-1">
                           <EyeIcon className="h-3 w-3" />
-                          <span>{visitor.pageViews} pages</span>
+                          <span>{visitor.pageViews || 0} pages</span>
                         </div>
                       </div>
 
                       <p className="text-xs text-gray-600 mt-1 truncate">
-                        Currently on: {visitor.currentPage}
+                        Currently on: {visitor.currentPage || visitor.landingPage || 'N/A'}
                       </p>
                     </div>
                   </div>
@@ -502,7 +607,8 @@ const VisitorTracking: React.FC<VisitorTrackingProps> = ({ app, currentUser }) =
                   </div>
                 </div>
               </VisitorItem>
-            ))}
+              ))
+            )}
           </div>
         </VisitorsList>
 

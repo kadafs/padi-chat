@@ -18,6 +18,9 @@ import 'reactflow/dist/style.css';
 import { connect } from 'react-redux';
 import styled from '@emotion/styled';
 import tw from 'twin.macro';
+import graphql from '@chaskiq/store/src/graphql/client';
+import { FLOWS, FLOW } from '@chaskiq/store/src/graphql/queries';
+import { CREATE_FLOW, UPDATE_FLOW, DELETE_FLOW } from '@chaskiq/store/src/graphql/mutations';
 import {
   PlusIcon,
   PlayIcon,
@@ -208,7 +211,7 @@ interface FlowBuilderProps {
   onSave?: (flowData: any) => void;
 }
 
-const FlowBuilder: React.FC<FlowBuilderProps> = ({ app, flowData, onSave }) => {
+const FlowBuilder: React.FC<FlowBuilderProps> = ({ app, flowData: initialFlowData, onSave }) => {
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const [selectedNode, setSelectedNode] = useState<Node | null>(null);
@@ -216,17 +219,83 @@ const FlowBuilder: React.FC<FlowBuilderProps> = ({ app, flowData, onSave }) => {
   const [showSettings, setShowSettings] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [flowName, setFlowName] = useState('New Flow');
+  const [currentFlowId, setCurrentFlowId] = useState<string | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
   const [reactFlowInstance, setReactFlowInstance] = useState<any>(null);
 
-  // Initialize with existing flow data
+  // Fetch flows list
+  const fetchFlows = () => {
+    if (!app?.key) return;
+    
+    setIsLoading(true);
+    graphql(
+      FLOWS,
+      {
+        appKey: app.key
+      },
+      {
+        success: (data) => {
+          const flows = data.flows || [];
+          // If we have a flow ID in URL or props, load it
+          // Otherwise, just show the list or create new
+          setIsLoading(false);
+        },
+        error: (err) => {
+          console.error('Error fetching flows:', err);
+          setIsLoading(false);
+        }
+      }
+    );
+  };
+
+  // Load a specific flow
+  const loadFlow = (flowId: string) => {
+    if (!app?.key || !flowId) return;
+    
+    setIsLoading(true);
+    graphql(
+      FLOW,
+      {
+        appKey: app.key,
+        id: flowId
+      },
+      {
+        success: (data) => {
+          const flow = data.flow;
+          if (flow) {
+            setCurrentFlowId(flow.id);
+            setFlowName(flow.name || 'New Flow');
+            // Parse flow data - adjust based on actual structure
+            const flowData = typeof flow.flowData === 'string' 
+              ? JSON.parse(flow.flowData) 
+              : flow.flowData || {};
+            setNodes(flowData.nodes || flow.nodes || []);
+            setEdges(flowData.edges || flow.edges || flow.connections || []);
+          }
+          setIsLoading(false);
+        },
+        error: (err) => {
+          console.error('Error loading flow:', err);
+          setIsLoading(false);
+        }
+      }
+    );
+  };
+
+  // Initialize with existing flow data or create new
   useEffect(() => {
-    if (flowData) {
-      setNodes(flowData.nodes || []);
-      setEdges(flowData.edges || []);
-      setFlowName(flowData.name || 'New Flow');
-    } else {
-      // Create initial start node
+    if (initialFlowData) {
+      setNodes(initialFlowData.nodes || []);
+      setEdges(initialFlowData.edges || []);
+      setFlowName(initialFlowData.name || 'New Flow');
+      if (initialFlowData.id) {
+        setCurrentFlowId(initialFlowData.id);
+      }
+    } else if (app?.key) {
+      // Check if there's a flow ID in the URL or load from props
+      // For now, create initial start node
       const startNode: Node = {
         id: 'start',
         type: 'input',
@@ -244,7 +313,7 @@ const FlowBuilder: React.FC<FlowBuilderProps> = ({ app, flowData, onSave }) => {
       };
       setNodes([startNode]);
     }
-  }, [flowData, setNodes, setEdges]);
+  }, [initialFlowData, app?.key, setNodes, setEdges]);
 
   const onConnect = useCallback(
     (params: Connection) => {
@@ -308,15 +377,54 @@ const FlowBuilder: React.FC<FlowBuilderProps> = ({ app, flowData, onSave }) => {
   };
 
   const handleSave = () => {
+    if (!app?.key || isSaving) return;
+    
+    setIsSaving(true);
     const flowData = {
       name: flowName,
-      nodes,
-      edges,
-      updatedAt: new Date().toISOString()
+      description: '',
+      active: true,
+      flowData: {
+        nodes,
+        edges
+      },
+      triggers: {}
     };
     
-    onSave?.(flowData);
-    console.log('Saving flow:', flowData);
+    const mutation = currentFlowId ? UPDATE_FLOW : CREATE_FLOW;
+    const variables = currentFlowId
+      ? {
+          appKey: app.key,
+          id: currentFlowId,
+          flowData: flowData
+        }
+      : {
+          appKey: app.key,
+          flowData: flowData
+        };
+    
+    graphql(
+      mutation,
+      variables,
+      {
+        success: (data) => {
+          const savedFlow = currentFlowId 
+            ? data.updateFlow?.flow 
+            : data.createFlow?.flow;
+          
+          if (savedFlow) {
+            setCurrentFlowId(savedFlow.id);
+            onSave?.(savedFlow);
+            console.log('Flow saved:', savedFlow);
+          }
+          setIsSaving(false);
+        },
+        error: (err) => {
+          console.error('Error saving flow:', err);
+          setIsSaving(false);
+        }
+      }
+    );
   };
 
   const handlePlay = () => {
@@ -376,6 +484,7 @@ const FlowBuilder: React.FC<FlowBuilderProps> = ({ app, flowData, onSave }) => {
             />
             <span className="text-sm text-gray-500">
               {nodes.length} nodes • {edges.length} connections
+              {isLoading && ' • Loading...'}
             </span>
           </div>
           
@@ -410,9 +519,10 @@ const FlowBuilder: React.FC<FlowBuilderProps> = ({ app, flowData, onSave }) => {
             
             <button
               onClick={handleSave}
-              className="px-4 py-2 text-sm font-medium bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              disabled={isSaving}
+              className="px-4 py-2 text-sm font-medium bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Save Flow
+              {isSaving ? 'Saving...' : 'Save Flow'}
             </button>
           </div>
         </Toolbar>
