@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { connect } from 'react-redux';
 import styled from '@emotion/styled';
 import tw from 'twin.macro';
@@ -21,6 +21,7 @@ import { ResponsiveLine } from '@nivo/line';
 import { ResponsiveBar } from '@nivo/bar';
 import graphql from '@chaskiq/store/src/graphql/client';
 import { VISITOR_SESSIONS, VISITOR_ANALYTICS, LIVE_VISITORS } from '@chaskiq/store/src/graphql/queries';
+import actioncable from 'actioncable';
 
 // Styled components
 const TrackingContainer = styled.div`
@@ -97,6 +98,7 @@ const VisitorTracking: React.FC<VisitorTrackingProps> = ({ app, currentUser }) =
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedVisitor, setSelectedVisitor] = useState<any>(null);
+  const cableSubscription = useRef<any>(null);
 
   // Fetch visitor sessions
   const fetchVisitorSessions = () => {
@@ -162,6 +164,85 @@ const VisitorTracking: React.FC<VisitorTrackingProps> = ({ app, currentUser }) =
       fetchAnalytics();
     }
   }, [timeFilter]);
+
+  // Set up real-time subscription for visitor updates
+  useEffect(() => {
+    if (!app?.key) return;
+
+    const chaskiq_cable_url = document.querySelector(
+      'meta[name="chaskiq-ws"]'
+      //@ts-ignore
+    )?.content;
+
+    if (!chaskiq_cable_url) return;
+
+    const accessToken = JSON.parse(localStorage.getItem('AUTH') || '{}')?.auth?.accessToken;
+    if (!accessToken) return;
+
+    const cable = actioncable.createConsumer(
+      `${chaskiq_cable_url}?app=${app.key}&token=${accessToken}`
+    );
+
+    cableSubscription.current = cable.subscriptions.create(
+      {
+        channel: 'EventsChannel',
+        app: app.key,
+      },
+      {
+        connected: () => {
+          console.log('Connected to visitor tracking events');
+        },
+        disconnected: () => {
+          console.log('Disconnected from visitor tracking events');
+        },
+        received: (data: any) => {
+          switch (data.type) {
+            case 'visitor:update':
+            case 'visitor:new':
+            case 'visitor:activity':
+              // Update visitor in real-time
+              if (data.data?.visitorSession) {
+                setVisitors((prev: any[]) => {
+                  const existing = prev.find((v: any) => v.id === data.data.visitorSession.id);
+                  if (existing) {
+                    return prev.map((v: any) => 
+                      v.id === data.data.visitorSession.id 
+                        ? { ...v, ...data.data.visitorSession }
+                        : v
+                    );
+                  } else {
+                    return [...prev, data.data.visitorSession];
+                  }
+                });
+              }
+              // Refresh analytics
+              fetchAnalytics();
+              break;
+            case 'visitor:offline':
+              // Remove or mark visitor as offline
+              if (data.data?.sessionId) {
+                setVisitors((prev: any[]) =>
+                  prev.map((v: any) =>
+                    v.sessionId === data.data.sessionId
+                      ? { ...v, isOnline: false }
+                      : v
+                  )
+                );
+              }
+              break;
+            default:
+              break;
+          }
+        },
+      }
+    );
+
+    return () => {
+      if (cableSubscription.current) {
+        cableSubscription.current.unsubscribe();
+      }
+    };
+  }, [app?.key]);
 
   // Mock visitor data - fallback if API fails
   const [mockVisitors] = useState([

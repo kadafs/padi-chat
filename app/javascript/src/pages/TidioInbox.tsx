@@ -22,7 +22,8 @@ import styled from '@emotion/styled';
 import tw from 'twin.macro';
 import graphql from '@chaskiq/store/src/graphql/client';
 import { CONVERSATIONS, CONVERSATION } from '@chaskiq/store/src/graphql/queries';
-import { INSERT_COMMMENT } from '@chaskiq/store/src/graphql/mutations';
+import { INSERT_COMMMENT, TYPING_NOTIFIER } from '@chaskiq/store/src/graphql/mutations';
+import actioncable from 'actioncable';
 
 // Tidio-inspired styled components
 const InboxContainer = styled.div`
@@ -152,7 +153,11 @@ const TidioInbox: React.FC<TidioInboxProps> = ({ app, conversations: reduxConver
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingMessages, setIsLoadingMessages] = useState(false);
   const [isSending, setIsSending] = useState(false);
+  const [typingUsers, setTypingUsers] = useState<Set<string>>(new Set());
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const cableSubscription = useRef<any>(null);
+  const typingTimeoutRef = useRef<{ [key: string]: NodeJS.Timeout }>({});
+  const typingDebounceRef = useRef<NodeJS.Timeout | null>(null);
 
   // Fetch conversations
   const fetchConversations = () => {
@@ -235,6 +240,129 @@ const TidioInbox: React.FC<TidioInboxProps> = ({ app, conversations: reduxConver
       fetchConversationMessages(activeConversation.id);
     }
   }, [activeConversation?.id]);
+
+  // Set up real-time subscription for conversation updates
+  useEffect(() => {
+    if (!app?.key) return;
+
+    const chaskiq_cable_url = document.querySelector(
+      'meta[name="chaskiq-ws"]'
+      //@ts-ignore
+    )?.content;
+
+    if (!chaskiq_cable_url) return;
+
+    const accessToken = JSON.parse(localStorage.getItem('AUTH') || '{}')?.auth?.accessToken;
+    if (!accessToken) return;
+
+    const cable = actioncable.createConsumer(
+      `${chaskiq_cable_url}?app=${app.key}&token=${accessToken}`
+    );
+
+    cableSubscription.current = cable.subscriptions.create(
+      {
+        channel: 'EventsChannel',
+        app: app.key,
+      },
+      {
+        connected: () => {
+          console.log('Connected to conversation events');
+        },
+        disconnected: () => {
+          console.log('Disconnected from conversation events');
+        },
+        received: (data: any) => {
+          switch (data.type) {
+            case 'conversation_part':
+              // New message received
+              const newMessage = data.data;
+              if (newMessage?.conversationKey === activeConversation?.key) {
+                setConversationMessages((prev: any[]) => [...prev, newMessage]);
+                scrollToBottom();
+              }
+              // Update conversation list
+              fetchConversations();
+              break;
+            case 'conversations:update_state':
+              // Conversation state changed
+              const updatedConv = data.data;
+              if (updatedConv?.key === activeConversation?.key) {
+                setActiveConversation((prev: any) => ({ ...prev, ...updatedConv }));
+              }
+              fetchConversations();
+              break;
+            case 'conversations:typing':
+              // Typing indicator
+              const typingData = data.data;
+              if (typingData?.conversationKey === activeConversation?.key) {
+                const userId = typingData.userId || typingData.appUserId;
+                if (typingData.typing) {
+                  setTypingUsers((prev) => new Set([...prev, userId]));
+                  // Clear typing indicator after 3 seconds
+                  if (typingTimeoutRef.current[userId]) {
+                    clearTimeout(typingTimeoutRef.current[userId]);
+                  }
+                  typingTimeoutRef.current[userId] = setTimeout(() => {
+                    setTypingUsers((prev) => {
+                      const next = new Set(prev);
+                      next.delete(userId);
+                      return next;
+                    });
+                    delete typingTimeoutRef.current[userId];
+                  }, 3000);
+                } else {
+                  setTypingUsers((prev) => {
+                    const next = new Set(prev);
+                    next.delete(userId);
+                    return next;
+                  });
+                  if (typingTimeoutRef.current[userId]) {
+                    clearTimeout(typingTimeoutRef.current[userId]);
+                    delete typingTimeoutRef.current[userId];
+                  }
+                }
+              }
+              break;
+            default:
+              break;
+          }
+        },
+      }
+    );
+
+    return () => {
+      if (cableSubscription.current) {
+        cableSubscription.current.unsubscribe();
+      }
+      // Clear all typing timeouts
+      Object.values(typingTimeoutRef.current).forEach(clearTimeout);
+    };
+  }, [app?.key, activeConversation?.key]);
+
+  // Send typing indicator (debounced)
+  const handleTyping = () => {
+    if (!activeConversation?.id || !app?.key) return;
+    
+    // Clear existing timeout
+    if (typingDebounceRef.current) {
+      clearTimeout(typingDebounceRef.current);
+    }
+    
+    // Send typing notification after 500ms of inactivity
+    typingDebounceRef.current = setTimeout(() => {
+      graphql(
+        TYPING_NOTIFIER,
+        {
+          appKey: app.key,
+          id: activeConversation.id
+        },
+        {
+          success: () => {},
+          error: () => {}
+        }
+      );
+    }, 500);
+  };
 
   // Mock data for demonstration (fallback)
   const [mockConversations] = useState([
@@ -634,6 +762,16 @@ const TidioInbox: React.FC<TidioInboxProps> = ({ app, conversations: reduxConver
                   );
                 })
               )}
+              {typingUsers.size > 0 && (
+                <div className="px-4 py-2 text-sm text-gray-500 italic">
+                  {Array.from(typingUsers).map((userId, idx) => (
+                    <span key={userId}>
+                      {idx > 0 && ', '}
+                      Someone is typing...
+                    </span>
+                  ))}
+                </div>
+              )}
               <div ref={messagesEndRef} />
             </ConversationContent>
             
@@ -643,7 +781,10 @@ const TidioInbox: React.FC<TidioInboxProps> = ({ app, conversations: reduxConver
                   className="w-full resize-none outline-none"
                   placeholder="Type your message..."
                   value={messageText}
-                  onChange={(e) => setMessageText(e.target.value)}
+                  onChange={(e) => {
+                    setMessageText(e.target.value);
+                    handleTyping();
+                  }}
                   onKeyPress={(e) => {
                     if (e.key === 'Enter' && !e.shiftKey) {
                       e.preventDefault();
