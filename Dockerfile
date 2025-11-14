@@ -96,7 +96,7 @@ RUN rm -rf /usr/src/app/node_modules \
     && rm -rf /root/.yarn \
     && rm -rf /root/.cache \
     && rm -rf /usr/local/bundle/cache \
-    && rm -rf /usr/local/bundle/bundler/gems/*/.git \
+    && find /usr/local/bundle -type d -name ".git" -exec rm -rf {} + || true \
     && find /usr/local/bundle -name "*.md" -delete \
     && find /usr/local/bundle -name "*.txt" -delete \
     && find /usr/local/bundle -name "*.rdoc" -delete \
@@ -107,6 +107,13 @@ RUN rm -rf /usr/src/app/node_modules \
     && find /usr/local/bundle -name "test" -type d -exec rm -rf {} + || true \
     && find /usr/local/bundle -name "spec" -type d -exec rm -rf {} + || true \
     && find /usr/local/bundle -name "*.gem" -delete \
+    && find /usr/local/bundle -name "*.rb~" -delete \
+    && find /usr/local/bundle -name "*.orig" -delete \
+    && find /usr/local/bundle -name ".DS_Store" -delete \
+    && find /usr/local/bundle -name ".gitignore" -delete \
+    && find /usr/local/bundle -name ".gitattributes" -delete \
+    && find /usr/local/bundle -name ".travis.yml" -delete \
+    && find /usr/local/bundle -name ".github" -type d -exec rm -rf {} + || true \
     && apt-get purge -y build-essential || true \
     && apt-get autoremove -y \
     && apt-get clean \
@@ -115,6 +122,12 @@ RUN rm -rf /usr/src/app/node_modules \
     && rm -rf /usr/share/doc \
     && rm -rf /usr/share/man \
     && rm -rf /usr/share/locale \
-    && truncate -s 0 /var/log/*.log
+    && rm -rf /usr/share/info \
+    && rm -rf /usr/share/lintian \
+    && truncate -s 0 /var/log/*.log \
+    && rm -rf /usr/src/app/.git || true \
+    && rm -rf /usr/src/app/.github || true \
+    && rm -rf /usr/src/app/spec || true \
+    && rm -rf /usr/src/app/test || true
 
 USER docker
