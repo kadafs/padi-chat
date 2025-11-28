@@ -60,7 +60,8 @@ RUN chown -R docker:docker /usr/src/app
 
 # Bundler install gems
 WORKDIR /tmp
-COPY Gemfile Gemfile.lock /tmp/
+COPY Gemfile /tmp/
+# Gemfile.lock will be created by bundle install if it doesn't exist
 # Clear bundler cache and git cache to ensure fresh fetches
 # Remove any cached git gems and force fresh fetch for globalize
 # Configure bundler to use system path
