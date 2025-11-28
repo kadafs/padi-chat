@@ -116,24 +116,22 @@ RUN rm -rf /usr/src/app/node_modules \
     && rm -rf /root/.yarn \
     && rm -rf /root/.cache \
     && rm -rf /usr/local/bundle/cache \
-    && find /usr/local/bundle -type d -name ".git" ! -path "*/bundler/gems/*" -exec rm -rf {} + || true \
-    && find /usr/local/bundle -name "*.md" ! -path "*/bundler/gems/*" -delete \
-    && find /usr/local/bundle -name "*.txt" ! -path "*/bundler/gems/*" -delete \
-    && find /usr/local/bundle -name "*.rdoc" ! -path "*/bundler/gems/*" -delete \
-    && find /usr/local/bundle -name "*.markdown" ! -path "*/bundler/gems/*" -delete \
-    && find /usr/local/bundle -name "CHANGELOG*" ! -path "*/bundler/gems/*" -delete \
-    && find /usr/local/bundle -name "LICENSE*" ! -path "*/bundler/gems/*" -delete \
-    && find /usr/local/bundle -name "*.gemspec" -type f ! -path "*/specifications/*" ! -path "*/bundler/gems/*" -delete \
-    && find /usr/local/bundle -name "test" -type d ! -path "*/bundler/gems/*" -exec rm -rf {} + || true \
-    && find /usr/local/bundle -name "spec" -type d ! -path "*/bundler/gems/*" -exec rm -rf {} + || true \
-    && find /usr/local/bundle -name "*.gem" ! -path "*/cache/*" ! -path "*/bundler/gems/*" -delete \
-    && find /usr/local/bundle -name "*.rb~" ! -path "*/bundler/gems/*" -delete \
-    && find /usr/local/bundle -name "*.orig" ! -path "*/bundler/gems/*" -delete \
-    && find /usr/local/bundle -name ".DS_Store" ! -path "*/bundler/gems/*" -delete \
-    && find /usr/local/bundle -name ".gitignore" ! -path "*/bundler/gems/*" -delete \
-    && find /usr/local/bundle -name ".gitattributes" ! -path "*/bundler/gems/*" -delete \
-    && find /usr/local/bundle -name ".travis.yml" ! -path "*/bundler/gems/*" -delete \
-    && find /usr/local/bundle -name ".github" -type d ! -path "*/bundler/gems/*" -exec rm -rf {} + || true \
+    && find /usr/local/bundle -type d -name ".git" ! -path "*/bundler/gems/*" ! -path "*/ruby/*/gems/*" -exec rm -rf {} + || true \
+    && find /usr/local/bundle/ruby -maxdepth 3 -name "*.md" -delete \
+    && find /usr/local/bundle/ruby -maxdepth 3 -name "*.txt" -delete \
+    && find /usr/local/bundle/ruby -maxdepth 3 -name "*.rdoc" -delete \
+    && find /usr/local/bundle/ruby -maxdepth 3 -name "*.markdown" -delete \
+    && find /usr/local/bundle/ruby -maxdepth 3 -name "CHANGELOG*" -delete \
+    && find /usr/local/bundle/ruby -maxdepth 3 -name "LICENSE*" -delete \
+    && find /usr/local/bundle/ruby -maxdepth 3 -name "*.gemspec" -type f ! -path "*/specifications/*" -delete \
+    && find /usr/local/bundle/ruby -maxdepth 3 -name "*.gem" -delete \
+    && find /usr/local/bundle/ruby -maxdepth 3 -name "*.rb~" -delete \
+    && find /usr/local/bundle/ruby -maxdepth 3 -name "*.orig" -delete \
+    && find /usr/local/bundle/ruby -maxdepth 3 -name ".DS_Store" -delete \
+    && find /usr/local/bundle/ruby -maxdepth 3 -name ".gitignore" -delete \
+    && find /usr/local/bundle/ruby -maxdepth 3 -name ".gitattributes" -delete \
+    && find /usr/local/bundle/ruby -maxdepth 3 -name ".travis.yml" -delete \
+    && find /usr/local/bundle/ruby -maxdepth 3 -name ".github" -type d -exec rm -rf {} + || true \
     && apt-get purge -y build-essential || true \
     && apt-get autoremove -y \
     && apt-get clean \
