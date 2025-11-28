@@ -83,13 +83,17 @@ module Chaskiq
     # Configure URLcrypt key from SECRET_KEY_BASE
     # Use a digest to ensure we get a safe 32-byte key without null bytes
     # This avoids issues with environment variables that cannot contain null bytes
+    # Note: URLcrypt.key= is deprecated, use URLCRYPT_KEY environment variable instead
     secret_key = Chaskiq::Config.get('SECRET_KEY_BASE')
-    if secret_key.present?
+    if secret_key.present? && ENV['URLCRYPT_KEY'].blank?
       # Generate a 32-byte key using SHA256 digest of SECRET_KEY_BASE
       # This ensures no null bytes and consistent key generation
       require 'digest'
       digest = Digest::SHA256.digest(secret_key.to_s)
-      URLcrypt.key = digest.byteslice(0, 32)
+      # Convert binary key to hex string (64 hex characters for 32 bytes)
+      # Hex strings are safe for environment variables and contain no null bytes
+      hex_key = digest.byteslice(0, 32).unpack1('H*')
+      ENV['URLCRYPT_KEY'] = hex_key
     end
 
     locales = %w[af sq ar eu bg be ca hr cs da nl en eo et fo fi fr gl de el iw hu is ga it ja ko lv lt mk mt no pl pt ro ru gd sr sr sk sl es sv tr uk zh-CN]
