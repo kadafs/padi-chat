@@ -22,22 +22,31 @@ RUN /docker-files/pg.sh
 # Install NodeJS, Yarn
 RUN /docker-files/node.sh
 
-# Configure bundler
+# Configure bundler and gem environment
 ENV LANG=C.UTF-8 \
     BUNDLE_JOBS=4 \
     BUNDLE_RETRY=3 \
     BUNDLE_PATH=/usr/local/bundle \
-    BUNDLE_APP_CONFIG=/usr/local/bundle
+    BUNDLE_APP_CONFIG=/usr/local/bundle \
+    GEM_HOME=/usr/local/bundle \
+    GEM_PATH=/usr/local/bundle
 
-# Uncomment this line if you want to run binstubs without prefixing with `bin/` or `bundle exec`
-# ENV PATH=/app/bin:$BUNDLE_BIN:$PATH
+# Set PATH to include bundle bin directory for binstubs
+ENV PATH=/usr/local/bundle/bin:$PATH
 
 # Upgrade RubyGems and install required Bundler version
 # Remove default bundler that comes with Ruby and install our version
+# Also remove any bundler executables from system paths
+# Set the installed bundler as the default
 RUN gem update --system && \
     gem uninstall bundler -a -x || true && \
-    gem install bundler:$BUNDLER_VERSION && \
-    bundle config set --global path /usr/local/bundle
+    rm -f /usr/local/bin/bundle /usr/local/bin/bundler || true && \
+    gem install bundler:$BUNDLER_VERSION --default && \
+    bundle config set --global path /usr/local/bundle && \
+    bundle config set --global app_config /usr/local/bundle && \
+    ln -sf /usr/local/bundle/bin/bundle /usr/local/bin/bundle || true && \
+    ln -sf /usr/local/bundle/bin/bundler /usr/local/bin/bundler || true && \
+    bundle --version
 
 # Change permissions for GEM_HOME
 RUN chmod -R 777 $GEM_HOME
@@ -114,10 +123,10 @@ RUN rm -rf /usr/src/app/node_modules \
     && find /usr/local/bundle -name "*.markdown" -delete \
     && find /usr/local/bundle -name "CHANGELOG*" -delete \
     && find /usr/local/bundle -name "LICENSE*" -delete \
-    && find /usr/local/bundle -name "*.gemspec" -delete \
+    && find /usr/local/bundle -name "*.gemspec" -type f ! -path "*/specifications/*" -delete \
     && find /usr/local/bundle -name "test" -type d -exec rm -rf {} + || true \
     && find /usr/local/bundle -name "spec" -type d -exec rm -rf {} + || true \
-    && find /usr/local/bundle -name "*.gem" -delete \
+    && find /usr/local/bundle -name "*.gem" ! -path "*/cache/*" -delete \
     && find /usr/local/bundle -name "*.rb~" -delete \
     && find /usr/local/bundle -name "*.orig" -delete \
     && find /usr/local/bundle -name ".DS_Store" -delete \
@@ -142,5 +151,9 @@ RUN rm -rf /usr/src/app/node_modules \
     && rm -rf /usr/src/app/test || true
 
 # Ensure bundler configuration is set for docker user
+# Also ensure the correct Bundler version is used and verify gems are installed
 USER docker
-RUN bundle config set --global path /usr/local/bundle
+RUN bundle config set --global path /usr/local/bundle && \
+    bundle config set --global app_config /usr/local/bundle && \
+    bundle --version && \
+    bundle check || bundle install
