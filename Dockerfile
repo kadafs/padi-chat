@@ -23,14 +23,21 @@ RUN /docker-files/pg.sh
 RUN /docker-files/node.sh
 
 # Configure bundler
-ENV LANG=C.UTF-8 BUNDLE_JOBS=4 BUNDLE_RETRY=3
+ENV LANG=C.UTF-8 \
+    BUNDLE_JOBS=4 \
+    BUNDLE_RETRY=3 \
+    BUNDLE_PATH=/usr/local/bundle \
+    BUNDLE_APP_CONFIG=/usr/local/bundle
 
 # Uncomment this line if you want to run binstubs without prefixing with `bin/` or `bundle exec`
 # ENV PATH=/app/bin:$BUNDLE_BIN:$PATH
 
 # Upgrade RubyGems and install required Bundler version
+# Remove default bundler that comes with Ruby and install our version
 RUN gem update --system && \
-    gem install bundler:$BUNDLER_VERSION
+    gem uninstall bundler -a -x || true && \
+    gem install bundler:$BUNDLER_VERSION && \
+    bundle config set --global path /usr/local/bundle
 
 # Change permissions for GEM_HOME
 RUN chmod -R 777 $GEM_HOME
@@ -47,11 +54,13 @@ WORKDIR /tmp
 COPY Gemfile Gemfile.lock /tmp/
 # Clear bundler cache and git cache to ensure fresh fetches
 # Remove any cached git gems and force fresh fetch for globalize
+# Configure bundler to use system path
 RUN rm -rf /usr/local/bundle/cache && \
     rm -rf /root/.bundle/cache && \
     rm -rf /usr/local/bundle/bundler/gems/globalize-* && \
     rm -rf /tmp/.bundle && \
     bundle config unset deployment && \
+    bundle config set --global path /usr/local/bundle && \
     bundle config set --local force_ruby_platform false && \
     bundle install -j ${BUNDLE_JOBS} --retry ${BUNDLE_RETRY} || \
     (bundle update globalize && bundle install -j ${BUNDLE_JOBS} --retry ${BUNDLE_RETRY})
@@ -68,7 +77,9 @@ COPY --chown=docker:docker . /usr/src/app/
 
 # Run bundle install again in the app directory to ensure git sources are available
 # This must run as root to write to /usr/local/bundle
-RUN bundle install -j ${BUNDLE_JOBS} --retry ${BUNDLE_RETRY}
+# Ensure bundler is configured to use the system path
+RUN bundle config set --global path /usr/local/bundle && \
+    bundle install -j ${BUNDLE_JOBS} --retry ${BUNDLE_RETRY}
 
 # Change to docker user for remaining operations
 USER docker
@@ -130,4 +141,6 @@ RUN rm -rf /usr/src/app/node_modules \
     && rm -rf /usr/src/app/spec || true \
     && rm -rf /usr/src/app/test || true
 
+# Ensure bundler configuration is set for docker user
 USER docker
+RUN bundle config set --global path /usr/local/bundle
