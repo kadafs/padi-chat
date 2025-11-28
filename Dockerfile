@@ -151,9 +151,8 @@ RUN rm -rf /usr/src/app/node_modules \
     && rm -rf /usr/src/app/test || true
 
 # Ensure bundler configuration is set for docker user
-# Also ensure the correct Bundler version is used and verify gems are installed
+# Verify bundler version (gems are already installed in previous steps)
 USER docker
 RUN bundle config set --global path /usr/local/bundle && \
     bundle config set --global app_config /usr/local/bundle && \
-    bundle --version && \
-    bundle check || bundle install
+    bundle --version
