@@ -116,7 +116,7 @@ RUN rm -rf /usr/src/app/node_modules \
     && rm -rf /root/.yarn \
     && rm -rf /root/.cache \
     && rm -rf /usr/local/bundle/cache \
-    && find /usr/local/bundle -type d -name ".git" -exec rm -rf {} + || true \
+    && find /usr/local/bundle -type d -name ".git" ! -path "*/bundler/gems/*" -exec rm -rf {} + || true \
     && find /usr/local/bundle -name "*.md" -delete \
     && find /usr/local/bundle -name "*.txt" -delete \
     && find /usr/local/bundle -name "*.rdoc" -delete \
