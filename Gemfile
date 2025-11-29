@@ -99,7 +99,7 @@ gem "roadie"
 gem "roadie-rails", github: "frederikspang/roadie-rails", branch: "master"
 gem "urlcrypt"
 
-gem "aws-sdk-rails"
+gem "aws-sdk-rails", "~> 3.9"
 gem "aws-sdk-s3", "~> 1.48"
 
 gem "mini_magick", "~> 4.8"
