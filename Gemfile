@@ -49,7 +49,7 @@ gem "nightfury", github: "michelson/nightfury" # "~> 1.0"
 gem "action_policy-graphql", "~> 0.6"
 gem "goldiloader"
 gem "graphiql-rails", group: :development
-gem "graphql", "~> 2.0"
+gem "graphql", "~> 2.0.0"
 
 gem "nokogiri", force_ruby_platform: true
 
