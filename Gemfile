@@ -46,7 +46,7 @@ gem "nightfury", github: "michelson/nightfury" # "~> 1.0"
 
 # gem 'tabs', github: 'michelson/tabs', branch: "upgrade"
 
-gem "action_policy-graphql", "~> 0.6"
+gem "action_policy-graphql", "~> 0.4"
 gem "goldiloader"
 gem "graphiql-rails", group: :development
 gem "graphql", "~> 1.13"
