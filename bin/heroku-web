@@ -3,5 +3,7 @@
 if [ "$ANYCABLE_DEPLOYMENT" == "true" ]; then
   bundle exec anycable --server-command="anycable-go"
 else
-  bundle exec rails server -p $PORT -b 0.0.0.0
+  # Puma reads PORT from ENV automatically (see config/puma.rb)
+  # No need to pass -p $PORT which can cause issues if $PORT is not expanded
+  bundle exec rails server -b 0.0.0.0
 fi
