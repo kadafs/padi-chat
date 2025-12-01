@@ -12,6 +12,8 @@ class ArticlesController < ApplicationController
 
   def messenger_data
     article_setting = ArticleSetting.find_by(subdomain: request.subdomains.join("."))
+    raise ActiveRecord::RecordNotFound, "ArticleSetting not found for subdomain: #{request.subdomains.join('.')}" if article_setting.nil?
+    
     @app = article_setting.app
     key = @app.encryption_key
     @sessionless = params[:sessionless]
