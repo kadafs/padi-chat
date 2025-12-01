@@ -1,6 +1,19 @@
 # frozen_string_literal: true
 
 module Types
+  class VisitorJourneyEntryType < Types::BaseObject
+    field :url, String, null: false
+    field :title, String, null: true
+    field :timestamp, GraphQL::Types::ISO8601DateTime, null: false
+    field :duration, Integer, null: true
+  end
+
+  class VisitorEventType < Types::BaseObject
+    field :name, String, null: false
+    field :data, GraphQL::Types::JSON, null: true
+    field :timestamp, GraphQL::Types::ISO8601DateTime, null: false
+  end
+
   class VisitorSessionType < Types::BaseObject
     field :id, ID, null: false
     field :session_id, String, null: false
@@ -76,18 +89,5 @@ module Types
     def conversations
       object.app_user.conversations.order(created_at: :desc)
     end
-  end
-
-  class VisitorJourneyEntryType < Types::BaseObject
-    field :url, String, null: false
-    field :title, String, null: true
-    field :timestamp, GraphQL::Types::ISO8601DateTime, null: false
-    field :duration, Integer, null: true
-  end
-
-  class VisitorEventType < Types::BaseObject
-    field :name, String, null: false
-    field :data, GraphQL::Types::JSON, null: true
-    field :timestamp, GraphQL::Types::ISO8601DateTime, null: false
   end
 end
