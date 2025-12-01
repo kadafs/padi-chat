@@ -1,6 +1,28 @@
 # frozen_string_literal: true
 
 module Types
+  class TriggerPageType < Types::BaseObject
+    field :page, String, null: false
+    field :triggers, Integer, null: false
+  end
+
+  class HourlyPerformanceType < Types::BaseObject
+    field :hour, Integer, null: false
+    field :triggers, Integer, null: false
+    field :conversations, Integer, null: false
+  end
+
+  class ProactiveMessageAnalyticsType < Types::BaseObject
+    field :impressions, Integer, null: false
+    field :conversations_started, Integer, null: false
+    field :conversion_rate, Float, null: false
+    field :average_response_time, Integer, null: false
+    
+    field :top_trigger_pages, [Types::TriggerPageType], null: false
+    field :hourly_performance, [Types::HourlyPerformanceType], null: false
+    field :device_breakdown, GraphQL::Types::JSON, null: false
+  end
+
   class ProactiveMessageType < Types::BaseObject
     field :id, ID, null: false
     field :name, String, null: false
@@ -50,28 +72,6 @@ module Types
     def analytics(time_range:)
       ProactiveMessageService.new(object.app).get_campaign_analytics(object.id, time_range)
     end
-  end
-
-  class ProactiveMessageAnalyticsType < Types::BaseObject
-    field :impressions, Integer, null: false
-    field :conversations_started, Integer, null: false
-    field :conversion_rate, Float, null: false
-    field :average_response_time, Integer, null: false
-    
-    field :top_trigger_pages, [Types::TriggerPageType], null: false
-    field :hourly_performance, [Types::HourlyPerformanceType], null: false
-    field :device_breakdown, GraphQL::Types::JSON, null: false
-  end
-
-  class TriggerPageType < Types::BaseObject
-    field :page, String, null: false
-    field :triggers, Integer, null: false
-  end
-
-  class HourlyPerformanceType < Types::BaseObject
-    field :hour, Integer, null: false
-    field :triggers, Integer, null: false
-    field :conversations, Integer, null: false
   end
 
   class ProactiveMessageInputType < Types::BaseInputObject
