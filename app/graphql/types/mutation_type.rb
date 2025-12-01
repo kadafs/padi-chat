@@ -2,7 +2,7 @@
 
 # Explicitly require proactive_messages mutations since they're all in one file
 # Zeitwerk expects one class per file, so we need to ensure the file is loaded
-require_relative '../../mutations/proactive_messages/manage_campaign'
+require_relative '../mutations/proactive_messages/manage_campaign'
 
 module Types
   class MutationType < Types::BaseObject
