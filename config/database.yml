@@ -51,13 +51,20 @@ staging:
   url: <%= Chaskiq::Config.get('DATABASE_URL') %>
 
 production:
-  <<: *default
+  adapter: postgresql
+  <% if ENV['DATABASE_URL'].present? %>
+  url: <%= ENV['DATABASE_URL'] %>
+  <% else %>
   database: <%= ENV.fetch('POSTGRES_DATABASE', 'chaskiq_production') %>
   username: <%= ENV.fetch('POSTGRES_USERNAME', 'chaskiq_prod') %>
   password: <%= ENV.fetch('POSTGRES_PASSWORD', 'chaskiq_prod') %>
+  host: <%= ENV.fetch('POSTGRES_HOST', 'localhost') %>
+  port: <%= ENV.fetch('POSTGRES_PORT', 5432) %>
+  <% end %>
   prepared_statements: false
-  adapter: postgresql
   min_messages: warning
+  pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
+  timeout: 5000
   host_names:
     ### Don't include the port number here. Change the "port" site setting instead, at /admin/site_settings.
     ### If you change this setting you will need to
