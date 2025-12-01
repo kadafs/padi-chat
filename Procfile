@@ -2,5 +2,5 @@
 #worker: bundle exec sidekiq -c 5 -v -q mailers,2 -q default
 #bin/heroku-worker
 worker: bundle exec sidekiq -C config/sidekiq.yml
-web: bin/heroku-web
+web: bundle exec puma -C config/puma.rb
 
