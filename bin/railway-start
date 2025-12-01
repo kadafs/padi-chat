@@ -1,46 +1,11 @@
 #!/bin/bash
 set -e
 
-# Colors for output
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-NC='\033[0m' # No Color
-
-echo -e "${GREEN}Starting Railway deployment...${NC}"
-
-# Check if we're in production environment
-if [ "$RAILS_ENV" != "production" ] && [ "$RACK_ENV" != "production" ]; then
-  echo -e "${YELLOW}Not in production environment, skipping migrations${NC}"
-else
-  echo -e "${GREEN}Checking for pending migrations...${NC}"
-  
-  # Run migrations
-  if bundle exec rails db:migrate:status > /dev/null 2>&1; then
-    echo -e "${GREEN}Database connection successful${NC}"
-    
-    # Check if there are pending migrations
-    PENDING=$(bundle exec rails db:migrate:status 2>/dev/null | grep -c "^\s*down" || echo "0")
-    
-    if [ "$PENDING" != "0" ]; then
-      echo -e "${YELLOW}Found $PENDING pending migration(s), running migrations...${NC}"
-      bundle exec rails db:migrate
-      echo -e "${GREEN}Migrations completed successfully${NC}"
-    else
-      echo -e "${GREEN}No pending migrations${NC}"
-    fi
-  else
-    echo -e "${RED}Warning: Could not connect to database. Migrations will be skipped.${NC}"
-    echo -e "${YELLOW}The application will start, but you may need to run migrations manually.${NC}"
-  fi
-fi
-
 # Start the appropriate server
+# Note: Database migrations are handled by preDeployCommand in railway.json
 if [ "$ANYCABLE_DEPLOYMENT" == "true" ]; then
-  echo -e "${GREEN}Starting AnyCable server...${NC}"
   bundle exec anycable --server-command="anycable-go"
 else
-  echo -e "${GREEN}Starting Puma server...${NC}"
   bundle exec puma -C config/puma.rb
 fi
 
