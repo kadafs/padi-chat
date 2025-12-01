@@ -1,9 +1,11 @@
 # frozen_string_literal: true
 
 class CreateTidioEnhancements < ActiveRecord::Migration[7.0]
-  def change
+  def up
+    # Skip if migration has already been partially applied
+    return if table_exists?(:conversation_analytics) && index_exists?(:conversation_analytics, :conversation_id)
     # Enhanced Visitor Tracking (Tidio-like)
-    create_table :visitor_sessions do |t|
+    create_table :visitor_sessions, if_not_exists: true do |t|
       t.references :app, null: false, foreign_key: true
       t.references :app_user, null: false, foreign_key: true
       t.string :session_id, null: false
@@ -28,7 +30,7 @@ class CreateTidioEnhancements < ActiveRecord::Migration[7.0]
     end
 
     # Advanced Chat Features
-    create_table :chat_ratings do |t|
+    create_table :chat_ratings, if_not_exists: true do |t|
       t.references :conversation, null: false, foreign_key: true
       t.references :app_user, null: false, foreign_key: true
       t.references :agent, null: true, foreign_key: true
@@ -39,7 +41,7 @@ class CreateTidioEnhancements < ActiveRecord::Migration[7.0]
     end
 
     # Enhanced Bot Builder (Visual Flow Builder)
-    create_table :flow_builders do |t|
+    create_table :flow_builders, if_not_exists: true do |t|
       t.references :app, null: false, foreign_key: true
       t.string :name, null: false
       t.text :description
@@ -52,7 +54,7 @@ class CreateTidioEnhancements < ActiveRecord::Migration[7.0]
     end
 
     # Proactive Chat (Tidio's key feature)
-    create_table :proactive_messages do |t|
+    create_table :proactive_messages, if_not_exists: true do |t|
       t.references :app, null: false, foreign_key: true
       t.string :name, null: false
       t.jsonb :trigger_conditions, default: {} # time_on_page, pages_visited, etc.
@@ -69,7 +71,7 @@ class CreateTidioEnhancements < ActiveRecord::Migration[7.0]
     end
 
     # Enhanced Email Marketing (Tidio Email)
-    create_table :email_sequences do |t|
+    create_table :email_sequences, if_not_exists: true do |t|
       t.references :app, null: false, foreign_key: true
       t.string :name, null: false
       t.text :description
@@ -79,7 +81,7 @@ class CreateTidioEnhancements < ActiveRecord::Migration[7.0]
       t.timestamps
     end
 
-    create_table :email_sequence_steps do |t|
+    create_table :email_sequence_steps, if_not_exists: true do |t|
       t.references :email_sequence, null: false, foreign_key: true
       t.string :name, null: false
       t.text :subject_line
@@ -91,7 +93,7 @@ class CreateTidioEnhancements < ActiveRecord::Migration[7.0]
       t.timestamps
     end
 
-    create_table :email_sequence_executions do |t|
+    create_table :email_sequence_executions, if_not_exists: true do |t|
       t.references :email_sequence, null: false, foreign_key: true
       t.references :app_user, null: false, foreign_key: true
       t.string :status, default: 'started' # started, in_progress, completed, cancelled, failed
@@ -103,8 +105,8 @@ class CreateTidioEnhancements < ActiveRecord::Migration[7.0]
     end
 
     # Advanced Analytics
-    create_table :conversation_analytics do |t|
-      t.references :conversation, null: false, foreign_key: true
+    create_table :conversation_analytics, if_not_exists: true do |t|
+      t.references :conversation, null: false, foreign_key: true, index: { unique: true }
       t.timestamp :first_response_at
       t.integer :first_response_time_seconds
       t.timestamp :resolution_at
@@ -119,7 +121,7 @@ class CreateTidioEnhancements < ActiveRecord::Migration[7.0]
     end
 
     # Live Typing Indicators
-    create_table :typing_indicators do |t|
+    create_table :typing_indicators, if_not_exists: true do |t|
       t.references :conversation, null: false, foreign_key: true
       t.references :user, polymorphic: true # Agent or AppUser
       t.timestamp :started_typing_at
@@ -129,7 +131,7 @@ class CreateTidioEnhancements < ActiveRecord::Migration[7.0]
     end
 
     # File Sharing Enhancements
-    create_table :shared_files do |t|
+    create_table :shared_files, if_not_exists: true do |t|
       t.references :conversation, null: false, foreign_key: true
       t.references :sender, polymorphic: true # Agent or AppUser
       t.string :file_name, null: false
@@ -144,7 +146,7 @@ class CreateTidioEnhancements < ActiveRecord::Migration[7.0]
     end
 
     # Enhanced Contact Management
-    create_table :contact_lists do |t|
+    create_table :contact_lists, if_not_exists: true do |t|
       t.references :app, null: false, foreign_key: true
       t.string :name, null: false
       t.text :description
@@ -154,7 +156,7 @@ class CreateTidioEnhancements < ActiveRecord::Migration[7.0]
       t.timestamps
     end
 
-    create_table :contact_list_memberships do |t|
+    create_table :contact_list_memberships, if_not_exists: true do |t|
       t.references :contact_list, null: false, foreign_key: true
       t.references :app_user, null: false, foreign_key: true
       t.timestamp :added_at
@@ -162,7 +164,7 @@ class CreateTidioEnhancements < ActiveRecord::Migration[7.0]
     end
 
     # Enhanced Widget Customization
-    create_table :widget_themes do |t|
+    create_table :widget_themes, if_not_exists: true do |t|
       t.references :app, null: false, foreign_key: true
       t.string :name, null: false
       t.jsonb :theme_config, default: {} # colors, fonts, animations, etc.
@@ -172,7 +174,7 @@ class CreateTidioEnhancements < ActiveRecord::Migration[7.0]
     end
 
     # Mobile App Push Notifications
-    create_table :push_notifications do |t|
+    create_table :push_notifications, if_not_exists: true do |t|
       t.references :app, null: false, foreign_key: true
       t.references :agent, null: true, foreign_key: true
       t.string :title, null: false
@@ -186,7 +188,7 @@ class CreateTidioEnhancements < ActiveRecord::Migration[7.0]
     end
 
     # Integration Enhancements
-    create_table :webhook_events do |t|
+    create_table :webhook_events, if_not_exists: true do |t|
       t.references :app, null: false, foreign_key: true
       t.string :event_type, null: false
       t.jsonb :payload, default: {}
@@ -198,28 +200,66 @@ class CreateTidioEnhancements < ActiveRecord::Migration[7.0]
       t.timestamps
     end
 
-    # Add indexes for performance
-    add_index :visitor_sessions, :session_id
-    add_index :visitor_sessions, [:app_id, :session_id]
-    add_index :visitor_sessions, :last_activity_at
-    add_index :proactive_messages, [:app_id, :active]
-    add_index :conversation_analytics, :conversation_id, unique: true
-    add_index :typing_indicators, [:conversation_id, :user_type, :user_id]
-    add_index :contact_list_memberships, [:contact_list_id, :app_user_id], unique: true
-    add_index :webhook_events, [:app_id, :event_type]
-    add_index :webhook_events, :delivered
+    # Add indexes for performance (only if they don't exist)
+    add_index :visitor_sessions, :session_id unless index_exists?(:visitor_sessions, :session_id)
+    add_index :visitor_sessions, [:app_id, :session_id] unless index_exists?(:visitor_sessions, [:app_id, :session_id])
+    add_index :visitor_sessions, :last_activity_at unless index_exists?(:visitor_sessions, :last_activity_at)
+    add_index :proactive_messages, [:app_id, :active] unless index_exists?(:proactive_messages, [:app_id, :active])
+    unless index_exists?(:typing_indicators, [:conversation_id, :user_type, :user_id], name: 'index_typing_indicators_on_conversation_and_user')
+      add_index :typing_indicators, [:conversation_id, :user_type, :user_id],
+        name: 'index_typing_indicators_on_conversation_and_user'
+    end
+    unless index_exists?(:contact_list_memberships, [:contact_list_id, :app_user_id], name: 'idx_contact_list_memberships_on_contact_and_user')
+      add_index :contact_list_memberships, [:contact_list_id, :app_user_id],
+        unique: true,
+        name: 'idx_contact_list_memberships_on_contact_and_user'
+    end
+    add_index :webhook_events, [:app_id, :event_type] unless index_exists?(:webhook_events, [:app_id, :event_type])
+    add_index :webhook_events, :delivered unless index_exists?(:webhook_events, :delivered)
 
-    # Add columns to existing tables
-    add_column :apps, :tidio_features, :jsonb, default: {}
-    add_column :conversations, :conversation_rating, :integer
-    add_column :conversations, :resolution_time_seconds, :integer
-    add_column :conversations, :customer_satisfaction_score, :integer
-    add_column :app_users, :total_conversations, :integer, default: 0
-    add_column :app_users, :last_contacted_at, :timestamp
-    add_column :app_users, :lead_score, :integer, default: 0
-    add_column :app_users, :lifecycle_stage, :string # visitor, lead, customer, etc.
-    add_column :agents, :online_status, :string, default: 'offline' # online, away, busy, offline
-    add_column :agents, :last_activity_at, :timestamp
-    add_column :agents, :mobile_push_token, :string
+    # Add columns to existing tables (only if they don't exist)
+    add_column :apps, :tidio_features, :jsonb, default: {} unless column_exists?(:apps, :tidio_features)
+    add_column :conversations, :conversation_rating, :integer unless column_exists?(:conversations, :conversation_rating)
+    add_column :conversations, :resolution_time_seconds, :integer unless column_exists?(:conversations, :resolution_time_seconds)
+    add_column :conversations, :customer_satisfaction_score, :integer unless column_exists?(:conversations, :customer_satisfaction_score)
+    add_column :app_users, :total_conversations, :integer, default: 0 unless column_exists?(:app_users, :total_conversations)
+    add_column :app_users, :last_contacted_at, :timestamp unless column_exists?(:app_users, :last_contacted_at)
+    add_column :app_users, :lead_score, :integer, default: 0 unless column_exists?(:app_users, :lead_score)
+    add_column :app_users, :lifecycle_stage, :string unless column_exists?(:app_users, :lifecycle_stage) # visitor, lead, customer, etc.
+    add_column :agents, :online_status, :string, default: 'offline' unless column_exists?(:agents, :online_status) # online, away, busy, offline
+    add_column :agents, :last_activity_at, :timestamp unless column_exists?(:agents, :last_activity_at)
+    add_column :agents, :mobile_push_token, :string unless column_exists?(:agents, :mobile_push_token)
+  end
+
+  def down
+    # Drop tables in reverse order
+    drop_table :webhook_events, if_exists: true
+    drop_table :push_notifications, if_exists: true
+    drop_table :widget_themes, if_exists: true
+    drop_table :contact_list_memberships, if_exists: true
+    drop_table :contact_lists, if_exists: true
+    drop_table :shared_files, if_exists: true
+    drop_table :typing_indicators, if_exists: true
+    drop_table :conversation_analytics, if_exists: true
+    drop_table :email_sequence_executions, if_exists: true
+    drop_table :email_sequence_steps, if_exists: true
+    drop_table :email_sequences, if_exists: true
+    drop_table :proactive_messages, if_exists: true
+    drop_table :flow_builders, if_exists: true
+    drop_table :chat_ratings, if_exists: true
+    drop_table :visitor_sessions, if_exists: true
+
+    # Remove columns from existing tables
+    remove_column :agents, :mobile_push_token, if_exists: true
+    remove_column :agents, :last_activity_at, if_exists: true
+    remove_column :agents, :online_status, if_exists: true
+    remove_column :app_users, :lifecycle_stage, if_exists: true
+    remove_column :app_users, :lead_score, if_exists: true
+    remove_column :app_users, :last_contacted_at, if_exists: true
+    remove_column :app_users, :total_conversations, if_exists: true
+    remove_column :conversations, :customer_satisfaction_score, if_exists: true
+    remove_column :conversations, :resolution_time_seconds, if_exists: true
+    remove_column :conversations, :conversation_rating, if_exists: true
+    remove_column :apps, :tidio_features, if_exists: true
   end
 end
