@@ -2,8 +2,6 @@
 
 class CreateTidioEnhancements < ActiveRecord::Migration[7.0]
   def up
-    # Skip if migration has already been partially applied
-    return if table_exists?(:conversation_analytics) && index_exists?(:conversation_analytics, :conversation_id)
     # Enhanced Visitor Tracking (Tidio-like)
     create_table :visitor_sessions, if_not_exists: true do |t|
       t.references :app, null: false, foreign_key: true
