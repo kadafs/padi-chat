@@ -27,9 +27,17 @@ class ArticlesController < ApplicationController
     # Auto-create ArticleSetting if not found but an App exists
     if article_setting.nil?
       # Try to find an app to associate with
-      app = App.find_by(domain_url: host) ||
-            App.where("domain_url LIKE ?", "%#{host}%").first ||
+      # domain_url is stored in preferences JSONB column, so we need to query it differently
+      app = App.where("preferences->>'domain_url' = ?", host).first ||
+            App.where("preferences->>'domain_url' LIKE ?", "%#{host}%").first ||
             (App.count == 1 ? App.first : nil)
+      
+      # If no app found by domain_url, try to find any app without ArticleSetting
+      if app.nil?
+        app = App.left_joins(:article_settings)
+                 .where(article_settings: { id: nil })
+                 .first || App.first
+      end
       
       if app.present? && app.article_settings.blank?
         # Auto-create ArticleSetting for the app
