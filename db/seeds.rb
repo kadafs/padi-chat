@@ -21,12 +21,20 @@ end
 # Update domain_url if it changed
 app.update(domain_url: domain) if app.domain_url != domain
 
-# Create ArticleSetting for the app if it doesn't exist
-unless app.article_settings.present?
-  # Extract subdomain from domain (remove protocol and path)
-  host = domain.gsub(/^https?:\/\//, '').split('/').first
-  subdomain = host.split('.').first if host.present?
-  
+# Create or update ArticleSetting for the app
+# Extract subdomain from domain (remove protocol and path)
+host = domain.gsub(/^https?:\/\//, '').split('/').first
+subdomain = host.split('.').first if host.present?
+
+if app.article_settings.present?
+  # Update existing ArticleSetting if domain/subdomain changed
+  article_setting = app.article_settings
+  article_setting.update(
+    subdomain: subdomain || article_setting.subdomain || 'app',
+    domain: host || article_setting.domain || domain
+  )
+else
+  # Create new ArticleSetting
   app.create_article_settings(
     subdomain: subdomain || 'app',
     domain: host || domain
