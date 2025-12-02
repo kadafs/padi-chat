@@ -24,6 +24,23 @@ class ArticlesController < ApplicationController
                       ArticleSetting.find_by(domain: host) ||
                       (ArticleSetting.count == 1 ? ArticleSetting.first : nil)
     
+    # Auto-create ArticleSetting if not found but an App exists
+    if article_setting.nil?
+      # Try to find an app to associate with
+      app = App.find_by(domain_url: host) ||
+            App.where("domain_url LIKE ?", "%#{host}%").first ||
+            (App.count == 1 ? App.first : nil)
+      
+      if app.present? && app.article_settings.blank?
+        # Auto-create ArticleSetting for the app
+        subdomain_value = subdomains.first || host.split('.').first
+        article_setting = app.create_article_settings(
+          subdomain: subdomain_value,
+          domain: host
+        )
+      end
+    end
+    
     if article_setting.nil?
       attempted_lookups = []
       attempted_lookups << "subdomain: #{subdomains.join('.')}" if subdomains.any?
