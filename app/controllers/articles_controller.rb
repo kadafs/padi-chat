@@ -11,8 +11,16 @@ class ArticlesController < ApplicationController
   private
 
   def messenger_data
-    article_setting = ArticleSetting.find_by(subdomain: request.subdomains.join("."))
-    raise ActiveRecord::RecordNotFound, "ArticleSetting not found for subdomain: #{request.subdomains.join('.')}" if article_setting.nil?
+    subdomains = request.subdomains
+    # Try full subdomain first (e.g., "web-production-d051e.up")
+    # Then try just the first subdomain (e.g., "web-production-d051e") for Railway domains
+    article_setting = ArticleSetting.find_by(subdomain: subdomains.join(".")) ||
+                      (subdomains.any? ? ArticleSetting.find_by(subdomain: subdomains.first) : nil)
+    
+    if article_setting.nil?
+      attempted_subdomains = subdomains.any? ? [subdomains.join("."), subdomains.first].compact.uniq.join(", ") : "none"
+      raise ActiveRecord::RecordNotFound, "ArticleSetting not found for subdomain(s): #{attempted_subdomains}"
+    end
     
     @app = article_setting.app
     key = @app.encryption_key
