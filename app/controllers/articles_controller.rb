@@ -12,14 +12,35 @@ class ArticlesController < ApplicationController
 
   def messenger_data
     subdomains = request.subdomains
-    # Try full subdomain first (e.g., "web-production-d051e.up")
-    # Then try just the first subdomain (e.g., "web-production-d051e") for Railway domains
+    host = request.host
+    
+    # Try multiple lookup strategies:
+    # 1. Full subdomain (e.g., "web-production-d051e.up")
+    # 2. First subdomain only (e.g., "web-production-d051e") for Railway domains
+    # 3. By domain field matching the host
+    # 4. Fallback: if only one ArticleSetting exists, use it (for single-tenant deployments)
     article_setting = ArticleSetting.find_by(subdomain: subdomains.join(".")) ||
-                      (subdomains.any? ? ArticleSetting.find_by(subdomain: subdomains.first) : nil)
+                      (subdomains.any? ? ArticleSetting.find_by(subdomain: subdomains.first) : nil) ||
+                      ArticleSetting.find_by(domain: host) ||
+                      (ArticleSetting.count == 1 ? ArticleSetting.first : nil)
     
     if article_setting.nil?
-      attempted_subdomains = subdomains.any? ? [subdomains.join("."), subdomains.first].compact.uniq.join(", ") : "none"
-      raise ActiveRecord::RecordNotFound, "ArticleSetting not found for subdomain(s): #{attempted_subdomains}"
+      attempted_lookups = []
+      attempted_lookups << "subdomain: #{subdomains.join('.')}" if subdomains.any?
+      attempted_lookups << "subdomain: #{subdomains.first}" if subdomains.any? && subdomains.length > 1
+      attempted_lookups << "domain: #{host}"
+      
+      # Get existing subdomains for debugging
+      existing_subdomains = ArticleSetting.pluck(:subdomain).compact
+      existing_domains = ArticleSetting.pluck(:domain).compact
+      
+      error_msg = "ArticleSetting not found. Tried: #{attempted_lookups.join(', ')}. "
+      if existing_subdomains.any? || existing_domains.any?
+        error_msg += "Existing ArticleSettings - subdomains: #{existing_subdomains.join(', ')}, domains: #{existing_domains.join(', ')}. "
+      end
+      error_msg += "Please create an ArticleSetting record with subdomain matching: #{subdomains.first || host} or domain matching: #{host}"
+      
+      raise ActiveRecord::RecordNotFound, error_msg
     end
     
     @app = article_setting.app
