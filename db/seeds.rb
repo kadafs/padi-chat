@@ -9,7 +9,19 @@
 #   Character.create(name: 'Luke', movie: movies.first)
 require 'app_packages_catalog'
 
-domain = ENV['HOST'] || 'http://localhost:3000'
+# Get domain from HOST env var, or use a default
+# For Railway, HOST should be set to the full URL (e.g., https://web-production-b4987.up.railway.app)
+domain = ENV['HOST']
+if domain.blank?
+  # Try to construct from Railway's environment
+  if ENV['RAILWAY_ENVIRONMENT'].present?
+    domain = "https://#{ENV['RAILWAY_PUBLIC_DOMAIN']}" if ENV['RAILWAY_PUBLIC_DOMAIN'].present?
+  end
+  domain ||= 'http://localhost:3000'
+end
+
+# Ensure domain has protocol
+domain = "https://#{domain}" unless domain.start_with?('http://', 'https://')
 
 AppPackagesCatalog.update_all unless Rails.env.test?
 
