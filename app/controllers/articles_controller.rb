@@ -24,7 +24,7 @@ class ArticlesController < ApplicationController
                       ArticleSetting.find_by(domain: host) ||
                       (ArticleSetting.count == 1 ? ArticleSetting.first : nil)
     
-    # Auto-create ArticleSetting if not found but an App exists
+    # Auto-create ArticleSetting if not found
     if article_setting.nil?
       # Try to find an app to associate with
       # domain_url is stored in preferences JSONB column, so we need to query it differently
@@ -39,13 +39,62 @@ class ArticlesController < ApplicationController
                  .first || App.first
       end
       
-      if app.present? && app.article_settings.blank?
-        # Auto-create ArticleSetting for the app
+      # If still no app, create one
+      if app.nil?
+        begin
+          app = App.create!(
+            name: 'Default App',
+            domain_url: "https://#{host}"
+          )
+          Rails.logger.info "Created default App for host: #{host}"
+        rescue StandardError => e
+          Rails.logger.error "Failed to create App: #{e.message}"
+          app = nil
+        end
+      end
+      
+      if app.present?
+        # Auto-create or update ArticleSetting for the app
         subdomain_value = subdomains.first || host.split('.').first
-        article_setting = app.create_article_settings(
-          subdomain: subdomain_value,
-          domain: host
-        )
+        
+        begin
+          if app.article_settings.present?
+            # Update existing ArticleSetting to match current subdomain/domain
+            article_setting = app.article_settings
+            # Only update if values are different to avoid validation issues
+            if article_setting.subdomain != subdomain_value || article_setting.domain != host
+              article_setting.update_columns(
+                subdomain: subdomain_value,
+                domain: host
+              )
+            end
+            article_setting.reload
+          else
+            # Create new ArticleSetting for the app
+            # Use find_or_create_by to handle race conditions
+            article_setting = ArticleSetting.find_or_create_by(app: app) do |as|
+              as.subdomain = subdomain_value
+              as.domain = host
+            end
+            # If it already existed, update it
+            if article_setting.persisted? && (article_setting.subdomain != subdomain_value || article_setting.domain != host)
+              article_setting.update_columns(
+                subdomain: subdomain_value,
+                domain: host
+              )
+              article_setting.reload
+            end
+          end
+        rescue ActiveRecord::RecordInvalid => e
+          # If creation/update fails (e.g., validation error), log and try to find existing
+          Rails.logger.error "Failed to create/update ArticleSetting: #{e.message}"
+          # Try to find by app only
+          article_setting = app.article_settings
+        rescue StandardError => e
+          Rails.logger.error "Error creating/updating ArticleSetting: #{e.message}"
+          # Try to find by app only
+          article_setting = app.article_settings
+        end
       end
     end
     
@@ -58,11 +107,13 @@ class ArticlesController < ApplicationController
       # Get existing subdomains for debugging
       existing_subdomains = ArticleSetting.pluck(:subdomain).compact
       existing_domains = ArticleSetting.pluck(:domain).compact
+      app_count = App.count
       
       error_msg = "ArticleSetting not found. Tried: #{attempted_lookups.join(', ')}. "
       if existing_subdomains.any? || existing_domains.any?
         error_msg += "Existing ArticleSettings - subdomains: #{existing_subdomains.join(', ')}, domains: #{existing_domains.join(', ')}. "
       end
+      error_msg += "Apps in database: #{app_count}. "
       error_msg += "Please create an ArticleSetting record with subdomain matching: #{subdomains.first || host} or domain matching: #{host}"
       
       raise ActiveRecord::RecordNotFound, error_msg
