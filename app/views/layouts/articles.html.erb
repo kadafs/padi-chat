@@ -5,7 +5,8 @@
     <link rel="icon" type="image/png" href="<%= @app.article_settings.logo_url %>">
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
-    <meta name="chaskiq-host" content="<%= ENV['HOST'] %>"/>
+    <% current_origin = (defined?(request) && request.base_url.presence) || ENV["HOST"] %>
+    <meta name="chaskiq-host" content="<%= current_origin %>"/>
     <meta content='True' name='HandheldFriendly'>
     <meta content='320' name='MobileOptimized'>
     <!--<meta content='width=device-width, initial-scale=1' name='viewport'>

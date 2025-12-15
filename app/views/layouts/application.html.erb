@@ -9,7 +9,8 @@
 
     <meta content='True' name='HandheldFriendly'>
     <meta content='320' name='MobileOptimized'>
-    <meta name="chaskiq-host" content="<%= Chaskiq::Config.get('HOST') %>"/>
+    <% current_origin = (defined?(request) && request.base_url.presence) || Chaskiq::Config.get('HOST') || ENV["HOST"] %>
+    <meta name="chaskiq-host" content="<%= current_origin %>"/>
     <meta name="chaskiq-ws" content="<%= Chaskiq::Config.get('WS') %>"/>
 
     <% if auth0_enabled? %>
@@ -57,7 +58,7 @@
       support_data = support_app_data and
       support_data.present? %>
 
-      <% embed_origin = request.base_url.presence || Chaskiq::Config.get('HOST') %>
+      <% embed_origin = request.base_url.presence || Chaskiq::Config.get('HOST') || ENV["HOST"] %>
       <script>
         (function(d,t) {
           var g=d.createElement(t),s=d.getElementsByTagName(t)[0];
