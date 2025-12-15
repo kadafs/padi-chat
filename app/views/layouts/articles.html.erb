@@ -47,15 +47,16 @@
       </script>
     <% end %>
 
+    <% embed_origin = request.base_url.presence || @h&.dig(:http) || ENV["HOST"] %>
     <script>
       (function(d,t) {
         var g=d.createElement(t),s=d.getElementsByTagName(t)[0];
-        g.src="<%=@h[:http] +request.env["HTTP_HOST"]%>/embed.js"
+        g.src="<%= embed_origin %>/embed.js"
         s.parentNode.insertBefore(g,s);
         g.onload=function(){
           window.chaskiqMessenger = new window.ChaskiqMessengerEncrypted({
-            domain: '<%=@h[:http] +request.env["HTTP_HOST"]%>',
-            ws:  '<%= Rails.application.config.action_cable.url %>',
+            domain: "<%= embed_origin %>",
+            ws:  "<%= Rails.application.config.action_cable.url %>",
             //lang: "<%= @lang %>",
             data: {},
             app_id: "<%= @app.key %>"
