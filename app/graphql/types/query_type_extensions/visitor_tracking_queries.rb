@@ -125,20 +125,6 @@ module Types
     end
   end
 
-  class VisitorAnalyticsType < Types::BaseObject
-    field :total_visitors, Integer, null: false
-    field :online_visitors, Integer, null: false
-    field :unique_visitors, Integer, null: false
-    field :returning_visitors, Integer, null: false
-    field :average_time_on_site, Integer, null: false
-    field :total_page_views, Integer, null: false
-    field :device_breakdown, GraphQL::Types::JSON, null: false
-    field :location_breakdown, [Types::LocationBreakdownType], null: false
-    field :traffic_sources, GraphQL::Types::JSON, null: false
-    field :hourly_activity, [Types::HourlyActivityType], null: false
-    field :popular_pages, [Types::PopularPageType], null: false
-  end
-
   class LocationBreakdownType < Types::BaseObject
     field :country, String, null: false
     field :visitors, Integer, null: false
@@ -152,6 +138,20 @@ module Types
   class PopularPageType < Types::BaseObject
     field :page, String, null: false
     field :views, Integer, null: false
+  end
+
+  class VisitorAnalyticsType < Types::BaseObject
+    field :total_visitors, Integer, null: false
+    field :online_visitors, Integer, null: false
+    field :unique_visitors, Integer, null: false
+    field :returning_visitors, Integer, null: false
+    field :average_time_on_site, Integer, null: false
+    field :total_page_views, Integer, null: false
+    field :device_breakdown, GraphQL::Types::JSON, null: false
+    field :location_breakdown, [Types::LocationBreakdownType], null: false
+    field :traffic_sources, GraphQL::Types::JSON, null: false
+    field :hourly_activity, [Types::HourlyActivityType], null: false
+    field :popular_pages, [Types::PopularPageType], null: false
   end
 
   class VisitorSegmentType < Types::BaseObject
