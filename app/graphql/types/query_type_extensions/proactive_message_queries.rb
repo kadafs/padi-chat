@@ -5,6 +5,15 @@ module Types
     module ProactiveMessageQueries
       extend ActiveSupport::Concern
 
+      # Define edge/connection types first so they are available to field declarations below.
+      class ProactiveMessageEdgeType < Types::BaseEdge
+        node_type(Types::ProactiveMessageType)
+      end
+
+      class ProactiveMessageConnectionType < Types::BaseConnection
+        edge_type(Types::ProactiveMessageEdgeType)
+      end
+
       included do
         field :proactive_messages, Types::ProactiveMessageConnectionType, null: false, connection: true do
           argument :app_key, String, required: true
@@ -213,14 +222,6 @@ module Types
         ((converted.to_f / total) * 100).round(2)
       end
     end
-  end
-
-  class ProactiveMessageConnectionType < Types::BaseConnection
-    edge_type(Types::ProactiveMessageEdgeType)
-  end
-
-  class ProactiveMessageEdgeType < Types::BaseEdge
-    node_type(Types::ProactiveMessageType)
   end
 
   class CampaignSuggestionType < Types::BaseObject
