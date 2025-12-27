@@ -9,12 +9,12 @@ module Types
         field :flow_builders, [Types::FlowBuilderType], null: false do
           argument :app_key, String, required: true
           argument :flow_type, String, required: false
-          argument :active_only, Boolean, required: false, default_value: false
+          argument :active_only, GraphQL::Types::Boolean, required: false, default_value: false
         end
 
         field :flow_builder, Types::FlowBuilderType, null: true do
           argument :app_key, String, required: true
-          argument :id, ID, required: true
+          argument :id, GraphQL::Types::ID, required: true
         end
       end
 
