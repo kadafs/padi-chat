@@ -29,7 +29,9 @@ ENV LANG=C.UTF-8 \
     BUNDLE_PATH=/usr/local/bundle \
     BUNDLE_APP_CONFIG=/usr/local/bundle \
     GEM_HOME=/usr/local/bundle \
-    GEM_PATH=/usr/local/bundle
+    GEM_PATH=/usr/local/bundle \
+    RAILS_SERVE_STATIC_FILES=true \
+    RAILS_LOG_TO_STDOUT=true
 
 # Set PATH to include bundle bin directory for binstubs
 ENV PATH=/usr/local/bundle/bin:$PATH
