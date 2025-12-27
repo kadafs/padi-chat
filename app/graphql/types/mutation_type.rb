@@ -1,16 +1,6 @@
 # frozen_string_literal: true
 
-# Explicitly require proactive_messages mutations since they're all in one file
-# Zeitwerk expects one class per file, so we need to ensure the file is loaded
-require_relative '../mutations/proactive_messages/manage_campaign'
 
-# Explicitly require flow_builders mutations since they're all in one file
-# Zeitwerk expects one class per file, so we need to ensure the file is loaded
-require_relative '../mutations/flow_builders/manage_flow'
-
-# Explicitly require email_sequences mutations since they're all in one file
-# Zeitwerk expects one class per file, so we need to ensure the file is loaded
-require_relative '../mutations/email_sequences/manage_sequence'
 
 module Types
   class MutationType < Types::BaseObject
