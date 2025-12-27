@@ -24,12 +24,12 @@ module Types
 
         field :proactive_message, Types::ProactiveMessageType, null: true do
           argument :app_key, String, required: true
-          argument :id, ID, required: true
+          argument :id, GraphQL::Types::ID, required: true
         end
 
         field :proactive_message_analytics, Types::ProactiveMessageAnalyticsType, null: false do
           argument :app_key, String, required: true
-          argument :campaign_id, ID, required: true
+          argument :campaign_id, GraphQL::Types::ID, required: true
           argument :time_range, String, required: false, default_value: '7d'
         end
 
