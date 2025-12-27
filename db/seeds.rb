@@ -53,7 +53,8 @@ else
   )
 end
 
-Doorkeeper::Application.find_or_create_by(name: 'authapp') do |doorkeeper_app|
-  doorkeeper_app.confidential = false
-  # redirect_uri: "#{domain}/callback"
-end
+auth_app = Doorkeeper::Application.find_or_create_by(name: 'authapp')
+auth_app.update!(
+  confidential: false,
+  redirect_uri: "#{domain}/callback"
+)
