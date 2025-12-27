@@ -129,7 +129,7 @@ gem "biz", "~> 1.8"
 gem "i18n-js", "~> 4.0.0.alpha1"
 
 # gem "globalize", github: "globalize/globalize", branch: "main"
-gem "globalize", github: "jules-w2/globalize", branch: "main"
+gem "globalize", github: "globalize/globalize", branch: "main"
 
 # To use Stripe, also include:
 gem "stripe", "~> 6.0"
