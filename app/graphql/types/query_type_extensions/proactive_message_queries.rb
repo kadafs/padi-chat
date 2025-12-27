@@ -1,18 +1,18 @@
 # frozen_string_literal: true
 
 module Types
+  # Define edge/connection types at the Types namespace level
+  class ProactiveMessageEdgeType < Types::BaseEdge
+    node_type(Types::ProactiveMessageType)
+  end
+
+  class ProactiveMessageConnectionType < Types::BaseConnection
+    edge_type(Types::ProactiveMessageEdgeType)
+  end
+
   module QueryTypeExtensions
     module ProactiveMessageQueries
       extend ActiveSupport::Concern
-
-      # Define edge/connection types first so they are available to field declarations below.
-      class ProactiveMessageEdgeType < Types::BaseEdge
-        node_type(Types::ProactiveMessageType)
-      end
-
-      class ProactiveMessageConnectionType < Types::BaseConnection
-        edge_type(Types::ProactiveMessageEdgeType)
-      end
 
       included do
         field :proactive_messages, Types::ProactiveMessageConnectionType, null: false, connection: true do
