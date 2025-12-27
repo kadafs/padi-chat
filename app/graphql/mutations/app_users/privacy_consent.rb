@@ -5,7 +5,7 @@ module Mutations
     class PrivacyConsent < Mutations::BaseMutation
       field :status, Types::JsonType, null: false
       argument :app_key, String, required: true
-      argument :consent, Boolean, required: true
+      argument :consent, GraphQL::Types::Boolean, required: true
 
       def resolve(app_key:, consent:)
         # app = App.find_by(key: app_key)
@@ -18,3 +18,4 @@ module Mutations
     end
   end
 end
+

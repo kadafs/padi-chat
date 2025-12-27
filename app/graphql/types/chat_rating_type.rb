@@ -2,7 +2,7 @@
 
 module Types
   class ChatRatingType < Types::BaseObject
-    field :id, ID, null: false
+    field :id, GraphQL::Types::ID, null: false
     field :conversation, Types::ConversationType, null: false
     field :app_user, Types::AppUserType, null: false
     field :agent, Types::AgentType, null: true
@@ -12,8 +12,8 @@ module Types
     field :created_at, GraphQL::Types::ISO8601DateTime, null: false
     field :updated_at, GraphQL::Types::ISO8601DateTime, null: false
 
-    field :positive, Boolean, null: false
-    field :negative, Boolean, null: false
+    field :positive, GraphQL::Types::Boolean, null: false
+    field :negative, GraphQL::Types::Boolean, null: false
 
     def positive
       object.positive?
@@ -24,4 +24,5 @@ module Types
     end
   end
 end
+
 

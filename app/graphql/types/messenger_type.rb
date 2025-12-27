@@ -4,7 +4,7 @@ module Types
   class MessengerType < Types::BaseObject
     field :app, Types::PublicAppType, null: true
     field :user, Types::UserType, null: true # Types::AppUserType, null: true
-    field :needs_privacy_consent, Boolean, null: true
+    field :needs_privacy_consent, GraphQL::Types::Boolean, null: true
 
     def app
       context[:set_locale].call
@@ -15,7 +15,7 @@ module Types
       context[:auth].call
     end
 
-    field :update_data, Boolean, null: true
+    field :update_data, GraphQL::Types::Boolean, null: true
 
     def update_data
       # TODO. detach this,
@@ -69,7 +69,7 @@ module Types
       @conversation = user_conversations.find_by(key: id)
     end
 
-    field :enabled_for_user, Boolean, null: true
+    field :enabled_for_user, GraphQL::Types::Boolean, null: true
 
     def enabled_for_user
       return false if object.inbound_settings.blank?
@@ -140,3 +140,4 @@ module Types
     end
   end
 end
+

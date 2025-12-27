@@ -2,10 +2,10 @@
 
 module Types
   class TypingIndicatorType < Types::BaseObject
-    field :id, ID, null: false
+    field :id, GraphQL::Types::ID, null: false
     field :conversation, Types::ConversationType, null: false
     field :user, Types::AuthorType, null: false
-    field :is_typing, Boolean, null: false
+    field :is_typing, GraphQL::Types::Boolean, null: false
     field :started_typing_at, GraphQL::Types::ISO8601DateTime, null: true
     field :stopped_typing_at, GraphQL::Types::ISO8601DateTime, null: true
     field :created_at, GraphQL::Types::ISO8601DateTime, null: false
@@ -21,5 +21,6 @@ module Types
     end
   end
 end
+
 
 

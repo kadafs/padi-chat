@@ -2,11 +2,11 @@
 
 module Types
   class ContactListType < Types::BaseObject
-    field :id, ID, null: false
+    field :id, GraphQL::Types::ID, null: false
     field :app, Types::AppType, null: false
     field :name, String, null: false
     field :description, String, null: true
-    field :is_dynamic, Boolean, null: false, default_value: false
+    field :is_dynamic, GraphQL::Types::Boolean, null: false, default_value: false
     field :filter_criteria, GraphQL::Types::JSON, null: true
     field :contacts_count, Integer, null: false, default_value: 0
     field :created_at, GraphQL::Types::ISO8601DateTime, null: false
@@ -24,5 +24,6 @@ module Types
     end
   end
 end
+
 
 

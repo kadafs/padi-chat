@@ -4,7 +4,7 @@ module Types
   class OauthApplicationType < Types::BaseObject
     field :name, String, null: true
     field :redirect_uri, String, null: true
-    field :confidential, Boolean, null: true
+    field :confidential, GraphQL::Types::Boolean, null: true
     field :scopes, String, null: true
     field :uid, String, null: true
     field :secret, String, null: true
@@ -13,3 +13,4 @@ module Types
     field :created_at, GraphQL::Types::ISO8601DateTime, null: true
   end
 end
+

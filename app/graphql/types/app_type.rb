@@ -8,9 +8,9 @@ module Types
     field :preferences, Types::JsonType, null: true
     field :app_users, [Types::AppUserType], null: true
     field :team_schedule, Types::JsonType, null: true
-    field :gather_social_data, Boolean, null: true
-    field :register_visits, Boolean, null: true
-    field :allow_idle_sessions, Boolean, null: true
+    field :gather_social_data, GraphQL::Types::Boolean, null: true
+    field :register_visits, GraphQL::Types::Boolean, null: true
+    field :allow_idle_sessions, GraphQL::Types::Boolean, null: true
     field :translations, [Types::JsonType], null: true
     field :custom_fields, [Types::JsonType], null: true
     field :app_packages, [Types::AppPackageType], null: true
@@ -100,7 +100,7 @@ module Types
       )
     end
 
-    field :subscriptions_enabled, Boolean, null: true
+    field :subscriptions_enabled, GraphQL::Types::Boolean, null: true
     def subscriptions_enabled
       context[:enabled_subscriptions]
     end
@@ -749,3 +749,4 @@ module Types
     end
   end
 end
+

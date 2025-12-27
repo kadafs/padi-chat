@@ -2,7 +2,7 @@
 
 module Types
   class SharedFileType < Types::BaseObject
-    field :id, ID, null: false
+    field :id, GraphQL::Types::ID, null: false
     field :conversation, Types::ConversationType, null: false
     field :sender, Types::AuthorType, null: false
     field :file_name, String, null: false
@@ -10,8 +10,8 @@ module Types
     field :file_size, Integer, null: true
     field :file_url, String, null: true
     field :thumbnail_url, String, null: true
-    field :is_image, Boolean, null: false, default_value: false
-    field :is_document, Boolean, null: false, default_value: false
+    field :is_image, GraphQL::Types::Boolean, null: false, default_value: false
+    field :is_document, GraphQL::Types::Boolean, null: false, default_value: false
     field :metadata, GraphQL::Types::JSON, null: true
     field :created_at, GraphQL::Types::ISO8601DateTime, null: false
     field :updated_at, GraphQL::Types::ISO8601DateTime, null: false
@@ -23,5 +23,6 @@ module Types
     end
   end
 end
+
 
 

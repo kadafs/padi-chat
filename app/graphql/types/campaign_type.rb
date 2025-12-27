@@ -11,7 +11,7 @@ module Types
     field :premailer, String, null: true
     field :serialized_content, String, null: true
     field :description, String, null: true
-    field :sent, Boolean, null: true
+    field :sent, GraphQL::Types::Boolean, null: true
     field :config_fields, Types::JsonType, null: true
     field :hidden_constraints, Types::JsonType, null: true
     field :stats_fields, Types::JsonType, null: true
@@ -57,3 +57,4 @@ module Types
     end
   end
 end
+

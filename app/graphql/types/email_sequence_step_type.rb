@@ -2,7 +2,7 @@
 
 module Types
   class EmailSequenceStepType < Types::BaseObject
-    field :id, ID, null: false
+    field :id, GraphQL::Types::ID, null: false
     field :email_sequence, Types::EmailSequenceType, null: false
     field :name, String, null: false
     field :subject_line, String, null: false
@@ -10,7 +10,7 @@ module Types
     field :step_order, Integer, null: false
     field :delay_days, Integer, null: false, default_value: 0
     field :delay_hours, Integer, null: false, default_value: 0
-    field :active, Boolean, null: false
+    field :active, GraphQL::Types::Boolean, null: false
     field :created_at, GraphQL::Types::ISO8601DateTime, null: false
     field :updated_at, GraphQL::Types::ISO8601DateTime, null: false
 
@@ -28,5 +28,6 @@ module Types
     end
   end
 end
+
 
 

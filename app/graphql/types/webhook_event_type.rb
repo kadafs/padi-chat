@@ -2,22 +2,22 @@
 
 module Types
   class WebhookEventType < Types::BaseObject
-    field :id, ID, null: false
+    field :id, GraphQL::Types::ID, null: false
     field :app, Types::AppType, null: false
     field :event_type, String, null: false
     field :webhook_url, String, null: false
     field :payload, GraphQL::Types::JSON, null: true
-    field :delivered, Boolean, null: false, default_value: false
+    field :delivered, GraphQL::Types::Boolean, null: false, default_value: false
     field :delivered_at, GraphQL::Types::ISO8601DateTime, null: true
     field :attempts, Integer, null: false, default_value: 0
     field :error_message, String, null: true
     field :created_at, GraphQL::Types::ISO8601DateTime, null: false
     field :updated_at, GraphQL::Types::ISO8601DateTime, null: false
 
-    field :is_delivered, Boolean, null: false
-    field :is_pending, Boolean, null: false
-    field :is_failed, Boolean, null: false
-    field :can_retry, Boolean, null: false
+    field :is_delivered, GraphQL::Types::Boolean, null: false
+    field :is_pending, GraphQL::Types::Boolean, null: false
+    field :is_failed, GraphQL::Types::Boolean, null: false
+    field :can_retry, GraphQL::Types::Boolean, null: false
 
     def is_delivered
       object.delivered?
@@ -36,5 +36,6 @@ module Types
     end
   end
 end
+
 
 

@@ -41,7 +41,7 @@ module Mutations
       field :errors, [String], null: false
 
       argument :app_key, String, required: true
-      argument :campaign_id, ID, required: true
+      argument :campaign_id, GraphQL::Types::ID, required: true
       argument :campaign_data, Types::ProactiveMessageInputType, required: true
 
       def resolve(app_key:, campaign_id:, campaign_data:)
@@ -76,7 +76,7 @@ module Mutations
       field :errors, [String], null: false
 
       argument :app_key, String, required: true
-      argument :campaign_id, ID, required: true
+      argument :campaign_id, GraphQL::Types::ID, required: true
       argument :sample_visitor_data, GraphQL::Types::JSON, required: false
 
       def resolve(app_key:, campaign_id:, sample_visitor_data: nil)
@@ -104,7 +104,7 @@ module Mutations
       field :errors, [String], null: false
 
       argument :app_key, String, required: true
-      argument :campaign_id, ID, required: true
+      argument :campaign_id, GraphQL::Types::ID, required: true
 
       def resolve(app_key:, campaign_id:)
         app = find_app(app_key)
@@ -138,7 +138,7 @@ module Mutations
       field :errors, [String], null: false
 
       argument :app_key, String, required: true
-      argument :campaign_id, ID, required: true
+      argument :campaign_id, GraphQL::Types::ID, required: true
 
       def resolve(app_key:, campaign_id:)
         app = find_app(app_key)

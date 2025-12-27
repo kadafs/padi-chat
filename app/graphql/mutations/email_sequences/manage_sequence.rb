@@ -40,7 +40,7 @@ module Mutations
       field :errors, [String], null: false
 
       argument :app_key, String, required: true
-      argument :id, ID, required: true
+      argument :id, GraphQL::Types::ID, required: true
       argument :sequence_data, GraphQL::Types::JSON, required: true
 
       def resolve(app_key:, id:, sequence_data:)
@@ -71,11 +71,11 @@ module Mutations
     end
 
     class DeleteSequence < Mutations::BaseMutation
-      field :success, Boolean, null: false
+      field :success, GraphQL::Types::Boolean, null: false
       field :errors, [String], null: false
 
       argument :app_key, String, required: true
-      argument :id, ID, required: true
+      argument :id, GraphQL::Types::ID, required: true
 
       def resolve(app_key:, id:)
         app = find_app(app_key)
@@ -109,7 +109,7 @@ module Mutations
       field :errors, [String], null: false
 
       argument :app_key, String, required: true
-      argument :id, ID, required: true
+      argument :id, GraphQL::Types::ID, required: true
 
       def resolve(app_key:, id:)
         app = find_app(app_key)
@@ -138,7 +138,7 @@ module Mutations
       field :errors, [String], null: false
 
       argument :app_key, String, required: true
-      argument :id, ID, required: true
+      argument :id, GraphQL::Types::ID, required: true
 
       def resolve(app_key:, id:)
         app = find_app(app_key)
@@ -163,4 +163,5 @@ module Mutations
     end
   end
 end
+
 

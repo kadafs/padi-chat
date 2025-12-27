@@ -111,7 +111,7 @@ module Mutations
     end
 
     class TrackEvent < Mutations::BaseMutation
-      field :success, Boolean, null: false
+      field :success, GraphQL::Types::Boolean, null: false
       field :errors, [String], null: false
 
       argument :app_key, String, required: true

@@ -18,8 +18,8 @@ module Mutations
       field :headers, String,
             "HTTP request headers (JSON-encoded)",
             null: false
-      field :blob_id, ID, "Created blob record ID", null: false
-      field :signed_blob_id, ID,
+      field :blob_id, GraphQL::Types::ID, "Created blob record ID", null: false
+      field :signed_blob_id, GraphQL::Types::ID,
             "Created blob record signed ID",
             null: false
     end
@@ -69,3 +69,4 @@ end
 
 # add this mutation to your Mutation type
 # field :create_direct_upload, mutation: CreateUrlUpload
+

@@ -2,14 +2,14 @@
 
 module Types
   class ConversationAnalyticsType < Types::BaseObject
-    field :id, ID, null: false
+    field :id, GraphQL::Types::ID, null: false
     field :conversation, Types::ConversationType, null: false
     field :first_response_time_seconds, Integer, null: true
     field :resolution_time_seconds, Integer, null: true
     field :agent_messages_count, Integer, null: false, default_value: 0
     field :customer_messages_count, Integer, null: false, default_value: 0
     field :bot_messages_count, Integer, null: false, default_value: 0
-    field :escalated_to_human, Boolean, null: false, default_value: false
+    field :escalated_to_human, GraphQL::Types::Boolean, null: false, default_value: false
     field :first_response_at, GraphQL::Types::ISO8601DateTime, null: true
     field :resolution_at, GraphQL::Types::ISO8601DateTime, null: true
     field :created_at, GraphQL::Types::ISO8601DateTime, null: false
@@ -34,5 +34,6 @@ module Types
     end
   end
 end
+
 
 

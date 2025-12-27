@@ -2,7 +2,7 @@
 
 module Types
   class EmailSequenceExecutionType < Types::BaseObject
-    field :id, ID, null: false
+    field :id, GraphQL::Types::ID, null: false
     field :email_sequence, Types::EmailSequenceType, null: false
     field :app_user, Types::AppUserType, null: false
     field :status, String, null: false
@@ -13,9 +13,9 @@ module Types
     field :created_at, GraphQL::Types::ISO8601DateTime, null: false
     field :updated_at, GraphQL::Types::ISO8601DateTime, null: false
 
-    field :is_active, Boolean, null: false
-    field :is_completed, Boolean, null: false
-    field :is_failed, Boolean, null: false
+    field :is_active, GraphQL::Types::Boolean, null: false
+    field :is_completed, GraphQL::Types::Boolean, null: false
+    field :is_failed, GraphQL::Types::Boolean, null: false
 
     def is_active
       %w[started in_progress].include?(object.status)
@@ -30,5 +30,6 @@ module Types
     end
   end
 end
+
 
 

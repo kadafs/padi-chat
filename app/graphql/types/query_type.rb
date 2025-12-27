@@ -26,7 +26,7 @@ module Types
       @app = current_user.apps
     end
 
-    field :can_create_apps, Boolean, null: false, description: "can create apps permission"
+    field :can_create_apps, GraphQL::Types::Boolean, null: false, description: "can create apps permission"
     def can_create_apps
       current_user.can_create_apps?
     end
@@ -44,7 +44,7 @@ module Types
 
     field :campaign_subscription_toggle, Types::JsonType, null: false, description: "toggle subscription" do
       argument :encoded, String, required: true
-      argument :op, Boolean, required: false
+      argument :op, GraphQL::Types::Boolean, required: false
     end
 
     def campaign_subscription_toggle(encoded:, op:)
@@ -82,3 +82,4 @@ module Types
     end
   end
 end
+

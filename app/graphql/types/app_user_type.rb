@@ -31,7 +31,7 @@ module Types
     field :name, String, null: true
 
     # field :app, [Types::AppType], null: true
-    field :online, Boolean, null: true
+    field :online, GraphQL::Types::Boolean, null: true
 
     field :avatar_url, String, null: true
 
@@ -59,7 +59,7 @@ module Types
       object.online?
     end
 
-    field :offline, Boolean, null: true
+    field :offline, GraphQL::Types::Boolean, null: true
 
     def offline
       object.offline?
@@ -106,3 +106,4 @@ module Types
     end
   end
 end
+

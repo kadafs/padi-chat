@@ -16,7 +16,7 @@ module Types
     field :region, String, null: true
     field :region_code, String, null: true
     field :avatar_url, String, null: true
-    field :available, Boolean, null: true
+    field :available, GraphQL::Types::Boolean, null: true
     field :inbound_email_address, String, null: true
 
     field :enable_deliveries, String, null: true
@@ -34,17 +34,17 @@ module Types
 
     delegate :agent_id, to: :object
 
-    field :owner, Boolean, null: true
+    field :owner, GraphQL::Types::Boolean, null: true
     def owner
       object.app.owner_id === object.agent_id
     end
 
-    field :online, Boolean, null: true
+    field :online, GraphQL::Types::Boolean, null: true
     def online
       object.online?
     end
 
-    field :offline, Boolean, null: true
+    field :offline, GraphQL::Types::Boolean, null: true
 
     field :sign_in_count, String, null: true
     field :last_sign_in_at, String, null: true
@@ -76,3 +76,4 @@ module Types
     end
   end
 end
+

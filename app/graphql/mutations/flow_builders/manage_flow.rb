@@ -12,7 +12,7 @@ module Mutations
       argument :flow_type, String, required: true
       argument :flow_data, GraphQL::Types::JSON, required: false
       argument :triggers, GraphQL::Types::JSON, required: false
-      argument :active, Boolean, required: false, default_value: true
+      argument :active, GraphQL::Types::Boolean, required: false, default_value: true
 
       def resolve(app_key:, name:, description: nil, flow_type:, flow_data: {}, triggers: {}, active: true)
         app = find_app(app_key)
@@ -50,12 +50,12 @@ module Mutations
       field :errors, [String], null: false
 
       argument :app_key, String, required: true
-      argument :flow_id, ID, required: true
+      argument :flow_id, GraphQL::Types::ID, required: true
       argument :name, String, required: false
       argument :description, String, required: false
       argument :flow_data, GraphQL::Types::JSON, required: false
       argument :triggers, GraphQL::Types::JSON, required: false
-      argument :active, Boolean, required: false
+      argument :active, GraphQL::Types::Boolean, required: false
 
       def resolve(app_key:, flow_id:, **args)
         app = find_app(app_key)
@@ -83,11 +83,11 @@ module Mutations
     end
 
     class DeleteFlow < Mutations::BaseMutation
-      field :success, Boolean, null: false
+      field :success, GraphQL::Types::Boolean, null: false
       field :errors, [String], null: false
 
       argument :app_key, String, required: true
-      argument :flow_id, ID, required: true
+      argument :flow_id, GraphQL::Types::ID, required: true
 
       def resolve(app_key:, flow_id:)
         app = find_app(app_key)
@@ -119,7 +119,7 @@ module Mutations
       field :errors, [String], null: false
 
       argument :app_key, String, required: true
-      argument :flow_id, ID, required: true
+      argument :flow_id, GraphQL::Types::ID, required: true
 
       def resolve(app_key:, flow_id:)
         app = find_app(app_key)
@@ -147,5 +147,6 @@ module Mutations
     end
   end
 end
+
 
 

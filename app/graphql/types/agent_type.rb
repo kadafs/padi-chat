@@ -14,7 +14,7 @@ module Types
     field :region_code, String, null: true
     field :avatar_url, String, null: true
     field :lang, String, null: true
-    field :available, Boolean, null: true
+    field :available, GraphQL::Types::Boolean, null: true
 
     field :area_of_expertise, String, null: true
     field :specialization, String, null: true
@@ -30,12 +30,12 @@ module Types
       object.name
     end
 
-    field :online, Boolean, null: true
+    field :online, GraphQL::Types::Boolean, null: true
     def online
       object.online?
     end
 
-    field :offline, Boolean, null: true
+    field :offline, GraphQL::Types::Boolean, null: true
     field :sign_in_count, String, null: true
     field :last_sign_in_at, String, null: true
     field :invitation_accepted_at, String, null: true
@@ -78,3 +78,4 @@ module Types
     end
   end
 end
+

@@ -14,7 +14,7 @@ module Types
 
         field :email_sequence, Types::EmailSequenceType, null: true, description: "Get a single email sequence" do
           argument :app_key, String, required: true
-          argument :id, ID, required: true
+          argument :id, GraphQL::Types::ID, required: true
         end
       end
 

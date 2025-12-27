@@ -155,7 +155,7 @@ module Types
   end
 
   class VisitorSegmentType < Types::BaseObject
-    field :id, ID, null: false
+    field :id, GraphQL::Types::ID, null: false
     field :name, String, null: false
     field :visit_count, Integer, null: false
     field :last_seen_at, GraphQL::Types::ISO8601DateTime, null: true

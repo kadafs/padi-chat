@@ -15,7 +15,7 @@ module Types
   end
 
   class VisitorSessionType < Types::BaseObject
-    field :id, ID, null: false
+    field :id, GraphQL::Types::ID, null: false
     field :session_id, String, null: false
     field :app_user, Types::AppUserType, null: false
     field :referrer_url, String, null: true
@@ -31,8 +31,8 @@ module Types
     field :geolocation, GraphQL::Types::JSON, null: true
     field :page_views, Integer, null: false
     field :time_on_site, Integer, null: false
-    field :is_returning, Boolean, null: false
-    field :is_online, Boolean, null: false
+    field :is_returning, GraphQL::Types::Boolean, null: false
+    field :is_online, GraphQL::Types::Boolean, null: false
     field :custom_attributes, GraphQL::Types::JSON, null: true
     field :first_seen_at, GraphQL::Types::ISO8601DateTime, null: true
     field :last_activity_at, GraphQL::Types::ISO8601DateTime, null: true

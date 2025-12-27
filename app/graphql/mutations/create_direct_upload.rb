@@ -20,8 +20,8 @@ module Mutations
       field :headers, String,
             "HTTP request headers (JSON-encoded)",
             null: false
-      field :blob_id, ID, "Created blob record ID", null: false
-      field :signed_blob_id, ID,
+      field :blob_id, GraphQL::Types::ID, "Created blob record ID", null: false
+      field :signed_blob_id, GraphQL::Types::ID,
             "Created blob record signed ID",
             null: false
     end
@@ -44,3 +44,4 @@ module Mutations
     end
   end
 end
+

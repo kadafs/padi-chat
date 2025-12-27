@@ -24,14 +24,14 @@ module Types
   end
 
   class ProactiveMessageType < Types::BaseObject
-    field :id, ID, null: false
+    field :id, GraphQL::Types::ID, null: false
     field :name, String, null: false
     field :trigger_type, String, null: false
     field :delay_seconds, Integer, null: false
     field :message_content, GraphQL::Types::JSON, null: false
     field :trigger_conditions, GraphQL::Types::JSON, null: true
     field :targeting_rules, GraphQL::Types::JSON, null: true
-    field :active, Boolean, null: false
+    field :active, GraphQL::Types::Boolean, null: false
     field :priority, Integer, null: false
     field :schedule, GraphQL::Types::JSON, null: true
     field :start_date, GraphQL::Types::ISO8601DateTime, null: true
@@ -81,7 +81,7 @@ module Types
     argument :message_content, GraphQL::Types::JSON, required: true
     argument :trigger_conditions, GraphQL::Types::JSON, required: false
     argument :targeting_rules, GraphQL::Types::JSON, required: false
-    argument :active, Boolean, required: false
+    argument :active, GraphQL::Types::Boolean, required: false
     argument :priority, Integer, required: false
     argument :schedule, GraphQL::Types::JSON, required: false
     argument :start_date, GraphQL::Types::ISO8601DateTime, required: false

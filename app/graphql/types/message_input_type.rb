@@ -6,6 +6,7 @@ module Types
     argument :html, String, required: false
     argument :serialized, String, required: false
     argument :text, String, required: false
-    argument :volatile, Boolean, required: false
+    argument :volatile, GraphQL::Types::Boolean, required: false
   end
 end
+

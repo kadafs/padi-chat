@@ -2,12 +2,12 @@
 
 module Types
   class EmailSequenceType < Types::BaseObject
-    field :id, ID, null: false
+    field :id, GraphQL::Types::ID, null: false
     field :app, Types::AppType, null: false
     field :name, String, null: false
     field :description, String, null: true
     field :trigger_event, String, null: true
-    field :active, Boolean, null: false
+    field :active, GraphQL::Types::Boolean, null: false
     field :created_at, GraphQL::Types::ISO8601DateTime, null: false
     field :updated_at, GraphQL::Types::ISO8601DateTime, null: false
 
@@ -33,5 +33,6 @@ module Types
     end
   end
 end
+
 
 

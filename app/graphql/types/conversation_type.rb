@@ -8,13 +8,13 @@ module Types
     field :id, String, null: true
     field :key, String, null: true
     field :reply_count, Integer, null: true
-    field :priority, Boolean, null: true
+    field :priority, GraphQL::Types::Boolean, null: true
     field :parts_count, Integer, null: true
     field :read_at, GraphQL::Types::ISO8601DateTime, null: true
     field :created_at, GraphQL::Types::ISO8601DateTime, null: true
     field :closed_at, GraphQL::Types::ISO8601DateTime, null: true
     field :subject, String, null: true
-    field :blocked, Boolean, null: true
+    field :blocked, GraphQL::Types::Boolean, null: true
     field :blocked_reason, String, null: true
 
     field :first_agent_reply, GraphQL::Types::ISO8601DateTime, null: true
@@ -73,3 +73,4 @@ module Types
     end
   end
 end
+

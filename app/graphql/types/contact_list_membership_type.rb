@@ -2,7 +2,7 @@
 
 module Types
   class ContactListMembershipType < Types::BaseObject
-    field :id, ID, null: false
+    field :id, GraphQL::Types::ID, null: false
     field :contact_list, Types::ContactListType, null: false
     field :app_user, Types::AppUserType, null: false
     field :added_at, GraphQL::Types::ISO8601DateTime, null: true
@@ -10,5 +10,6 @@ module Types
     field :updated_at, GraphQL::Types::ISO8601DateTime, null: false
   end
 end
+
 
 

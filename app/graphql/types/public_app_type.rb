@@ -6,7 +6,7 @@ module Types
     field :name, String, null: true
     field :tagline, String, null: true
     field :domain_url, String, null: true
-    field :active_messenger, Boolean, null: true
+    field :active_messenger, GraphQL::Types::Boolean, null: true
     field :theme, String, null: true
     field :customization_colors, Types::JsonType, null: true
     field :reply_time, String, null: true
@@ -16,7 +16,7 @@ module Types
     field :intro, String, null: true
     field :user_tasks_settings, Types::JsonType, null: true
     field :lead_tasks_settings, Types::JsonType, null: true
-    field :inline_new_conversations, Boolean, null: true
+    field :inline_new_conversations, GraphQL::Types::Boolean, null: true
     field :home_apps, [Types::JsonType], null: true
     field :searcheable_fields, [Types::JsonType], null: true
     field :privacy_consent_required, String, null: true
@@ -71,7 +71,7 @@ module Types
       object.translations.map(&:locale)
     end
 
-    field :in_business_hours, Boolean, null: true
+    field :in_business_hours, GraphQL::Types::Boolean, null: true
     def in_business_hours
       object.in_business_hours?(Time.current)
     end
@@ -139,3 +139,4 @@ module Types
     end
   end
 end
+
